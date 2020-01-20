@@ -72,6 +72,7 @@ class GraphManager:
 
     def optimize(self):
         self.merge_datasets()
+        self.optimize_selections()
 
     def merge_datasets(self):
         logger.debug('%%%%%%%%%% Merging datasets:')
@@ -84,12 +85,31 @@ class GraphManager:
                     if merged_graph == graph:
                         for child in graph.children:
                             merged_graph.children.append(child)
-        # Debug
-        def print_merged_graphs():
-            logger.debug('%%%%%%%%%% Merging datasets: DONE')
-            print('Merged graphs:')
-            for graph in merged_graphs:
-                print(graph)
-        print_merged_graphs()
-
         self.graphs = merged_graphs
+        logger.debug('%%%%%%%%%% Merging datasets: DONE')
+        self.print_merged_graphs()
+
+    def optimize_selections(self):
+        logger.debug('%%%%%%%%%% Optimizing selections:')
+        def _merge_children(node):
+            merged_children = list()
+            for child in node.children:
+                if child not in merged_children:
+                    merged_children.append(child)
+                else:
+                    merged_children[merged_children.index(
+                        child)].children.extend(
+                            child.children)
+            node.children = merged_children
+            for child in node.children:
+                _merge_children(child)
+        for merged_graph in self.graphs:
+            _merge_children(merged_graph)
+        logger.debug('%%%%%%%%%% Optimizing selections: DONE')
+        self.print_merged_graphs()
+
+    def print_merged_graphs(self):
+        print('Merged graphs:')
+        for graph in self.graphs:
+            print(graph)
+
