@@ -81,6 +81,11 @@ class Selection:
     def __str__(self):
         return 'Selection-{}'.format(self.name)
 
+    def __eq__(self, other):
+        return self.name == other.name and \
+            self.cuts == other.cuts and \
+            self.weights == other.weights
+
     def set_cuts(self, cuts):
         if cuts is not None:
             try:
