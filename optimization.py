@@ -70,9 +70,20 @@ class GraphManager:
     def add_graph_from_afu(self, afu):
         self.graphs.append(Graph(afu))
 
-    def optimize(self):
-        self.merge_datasets()
-        self.optimize_selections()
+    def optimize(self, level = 2):
+        if int(level) == 0:
+            print('No optimization selected.')
+        elif int(level) == 1:
+            print('Level 1 optimization selected: merge datasets.')
+            self.merge_datasets()
+        elif int(level) >= 2:
+            print('Level 2 optimization selected: merge datasets and selections.')
+            self.merge_datasets()
+            self.optimize_selections()
+        else:
+            print('Invalid level of optimization, default to FULL OPTIMIZED.')
+            self.merge_datasets()
+            self.optimize_selections()
 
     def merge_datasets(self):
         logger.debug('%%%%%%%%%% Merging datasets:')
