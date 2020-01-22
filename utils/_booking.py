@@ -70,6 +70,21 @@ class Dataset:
             self.ntuples.append(new_ntuple)
 
 
+class Operation:
+    def __init__(
+            self, expression, name):
+        self.expression = expression
+        self.name = name
+
+
+class Cut(Operation):
+    pass
+
+
+class Weight(Operation):
+    pass
+
+
 class Selection:
     def __init__(
             self, name = None,
@@ -88,38 +103,35 @@ class Selection:
 
     def set_cuts(self, cuts):
         if cuts is not None:
-            try:
-                self.__check_format(cuts)
-                self.cuts = cuts
-            except TypeError as err:
-                print(err, 'Cuts assigned to empty list')
-                self.cuts = []
+            self.__check_format(cuts, Cut)
+            self.cuts = cuts
         else:
             self.cuts = []
 
     def set_weights(self, weights):
         if weights is not None:
-            try:
-                self.__check_format(weights)
-                self.weights = weights
-            except TypeError as err:
-                print(err, 'Weights assigned to empty list')
-                self.weights = []
+            self.__check_format(weights, Weight)
+            self.weights = weights
         else:
             self.weights = []
 
-    def __check_format(self, list_of_dtuples):
-        if isinstance(list_of_dtuples, list):
-            for dtuple in list_of_dtuples:
-                if isinstance(dtuple, tuple)\
-                        and len(dtuple) == 2:
-                    return True
+    def __check_format(self, lst, operation):
+        if isinstance(lst, list):
+            for ob in lst:
+                if isinstance(ob, tuple)\
+                        and len(ob) == 2:
+                    lst[lst.index(ob)] = operation(*ob)
+                    ret_value = True
+                elif isinstance(ob, operation):
+                    ret_value = True
                 else:
                     raise TypeError(
-                            'TypeError: tuples of lenght 2 are needed.\n')
+                            'TypeError: pass 2-tuples or {} objects.\n'.format(
+                                str(operation)))
         else:
             raise TypeError(
                     'TypeError: a list of tuples is needed.\n')
+        return ret_value
 
 
 class Binning:

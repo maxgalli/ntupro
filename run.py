@@ -137,7 +137,7 @@ class RunManager:
         l_rdf = rdf.Define(selection_name, '1')
         if selection.cuts:
             cut_name = '__cut__' + selection.name
-            cut_expression = ' && '.join([cut[0] for cut in selection.cuts])
+            cut_expression = ' && '.join([cut.expression for cut in selection.cuts])
             logger.debug('%%%%% Definig merged cut {} column'.format(
                 cut_expression))
             rdf = l_rdf.Define(
@@ -147,7 +147,7 @@ class RunManager:
         if selection.weights:
             weight_name = '__weight__' + selection.name
             weight_expression = '*'.join([
-                weight[0] for weight in selection.weights])
+                weight.expression for weight in selection.weights])
             rdf = l_rdf.Define(
                 weight_name,
                 weight_expression)
