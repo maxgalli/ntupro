@@ -1,10 +1,10 @@
 from .utils import Dataset
+from .utils import Selection
 from .utils import Friend
 from .utils import Ntuple
-
 from .utils import Action
-from .utils import BookCount
-from .utils import BookHisto
+from .utils import Count
+from .utils import Histogram
 
 from ROOT import TFile
 
@@ -198,39 +198,32 @@ class DatasetFromDatabase:
 
 dataset_from_database = DatasetFromDatabase()
 
-class AnalysisFlowUnit:
+class Unit:
     """
-    Building block of a minimal analysis flow, consisting
+    Building element of a minimal analysis flow, consisting
     of a dataset, a set of selections to apply on the data
-    and an action.
+    and a set of actions.
 
     Attributes:
         dataset (Dataset): Set of TTree objects to run the
             analysis on
         selections (list): List of Selection-type objects
-        action (Action): Action to perform on the processed
-            dataset, can be 'BookHisto' or 'BookCount'
+        actions (Action): Actions to perform on the processed
+            dataset, can be 'Histogram' or 'Count'
     """
     def __init__(
             self,
-            dataset, selections, action = None):
+            dataset, selections, actions):
         self.__set_dataset(dataset)
         self.__set_selections(selections)
-        self.__set_action(action)
+        self.__set_actions(actions)
 
     def __str__(self):
         layout = '\n'.join([
             'Dataset: {}'.format(self.dataset.name),
             'Selections: {}'.format(self.selections),
-            'Action: {}'.format(self.action)])
+            'Actions: {}'.format(self.actions)])
         return layout
-
-    def book_count(self):
-        self.action = BookCount()
-
-    def book_histo(self, binning, variable):
-        self.action = BookHisto(
-            self.binning, self.variable)
 
     def __set_dataset(self, dataset):
         if isinstance(dataset, Dataset):
@@ -241,50 +234,58 @@ class AnalysisFlowUnit:
 
     def __set_selections(self, selections):
         if isinstance(selections, list):
-            self.selections = selections
+            for selection in selections:
+                if isinstance(selection, Selection):
+                    is_selection = True
+                else:
+                    is_selection = False
+                    break
+            if is_selection:
+                self.selections = selections
+            else:
+                raise TypeError(
+                   'TypeError: not Selection objects.')
         else:
             raise TypeError(
                 'TypeError: not a list object.')
 
-    def __set_action(self, action):
-        if isinstance(action, Action):
-            self.action = action
+    def __set_actions(self, actions):
+        if isinstance(actions, list):
+            for action in actions:
+                if isinstance(action, Action):
+                    is_action = True
+                else:
+                    is_action = False
+                    break
+            if is_action:
+                self.actions = actions
+            else:
+                raise TypeError(
+                   'TypeError: not Action objects.')
         else:
             raise TypeError(
-                    'TypeError: not an Action object.')
+                    'TypeError: not a list object.')
 
 
-class AnalysisFlowManager:
+class UnitManager:
     """
-    Manager of all the AnalysisFlowUnit objects that are created.
-    It can both be initialized with a variable amount of AnalysisFlowUnit
+    Manager of all the Unit objects that are created.
+    It can both be initialized with a variable amount of Unit
     objects as arguments or with no arguments, with the above mentioned
-    objects added in a second time with the functions 'book_count' and
-    'book_histo'.
+    objects added in a second time with the function 'book'.
 
     Args:
-        *args (AnalysisFlowUnit): Objects with the structure [dataset,
-            selections, action]
+        *args (Unit): Objects with the structure [dataset,
+            selections, actions]
 
     Attributes:
         booked_units (list): List of the booked units, updated during
-            initialization or with the functions 'book_count' and
-            'booked_histo'
+            initialization or with the function 'book'
     """
 
     def __init__(self, *args):
-        self.booked_units = [arg for arg in args]
+        self.booked_units = [arg for arg in args \
+                if isinstance(arg, Unit)]
 
-    def book_count(self,
-            dataset, selections):
-        self.booked_units.append(
-            AnalysisFlowUnit(
-                dataset, selections, BookCount()))
-
-    def book_histo(self,
-            dataset, selections,
-            binning, variable):
-        self.booked_units.append(
-            AnalysisFlowUnit(
-                dataset, selections, BookHisto(
-                    binning, variable)))
+    def book(self, actions):
+        self.booked_units.extend(actions)

@@ -3,28 +3,28 @@ logger = logging.getLogger(__name__)
 
 class Node:
     def __init__(self,
-            name, kind, afu_block, *children):
+            name, kind, unit_block, *children):
         self.name = name
         self.kind = kind
-        self.afu_block = afu_block
+        self.unit_block = unit_block
         self.children = [
             child for child in children]
 
     def __str__(self):
-        node_intest =     '////// Node Object ///////'
+        node_intest = '// Node //////'
         end = ' //'
         bar_end = '///'
         safe_number_intest = len(node_intest)
         objects_intests = [
-            '// Name:                  ',
-            '// Kind:                  ',
-            '// AnalysisFlowUnitBlock: ',
-            '// Children:              '
+            '// Name:      ',
+            '// Kind:      ',
+            '// UnitBlock: ',
+            '// Children:  '
             ]
         objects = [
             str(self.name),
             str(self.kind),
-            str(self.afu_block),
+            str(self.unit_block),
             str(self.children)
             ]
         objects_tuples = [(oi, o) for oi,o in zip(objects_intests, objects)]
@@ -56,12 +56,12 @@ class Node:
         logger.debug('__eq__ compares: names ({} with {}), kinds ({} and {}) and AFU blocks ({} and {})'.format(
                 self.name, other.name,
                 self.kind, other.kind,
-                self.afu_block, other.afu_block))
+                self.unit_block, other.unit_block))
         return self.name == other.name and \
             self.kind == other.kind and \
-            self.afu_block == other.afu_block
+            self.unit_block == other.unit_block
 
     def __hash__(self):
         return hash((
-            self.name, self.kind, self.afu_block))
+            self.name, self.kind, self.unit_block))
 

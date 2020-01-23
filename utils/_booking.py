@@ -152,15 +152,17 @@ class Action:
         return '{}-{}'.format(self.name, self.variable)
 
 
-class BookCount(Action):
-    def __init__(self, variable):
-        Action.__init__(self, 'BookCount', variable)
+class Count(Action):
+    pass
 
 
-class BookHisto(Action):
+class Histogram(Action):
     def __init__(
-            self,
-            variable, edges):
-        Action.__init__(self, 'BookHisto', variable)
-        self.binning = Binning(
-            variable, edges)
+            self, name,
+            variable, edges = None):
+        Action.__init__(self, name, variable)
+        if isinstance(variable, Binning) and edges is None:
+            self.binning = variable
+        else:
+            self.binning = Binning(
+                variable, edges)

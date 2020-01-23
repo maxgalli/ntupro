@@ -1,4 +1,4 @@
-from .booking import AnalysisFlowUnit
+from .booking import Unit
 
 from .utils import Node
 
@@ -14,35 +14,41 @@ class Graph(Node):
     kind 'dataset'.
 
     Args:
-        analysis_flow_unit (AnalysisFlowUnit): analysis flow unit
-            object from which a graph in its basic form is generated
+        unit (Unit): unit object from which a graph
+            in its basic form is generated
     """
-    def __init__(self, afu = None):
-        if afu:
+    def __init__(self, unit = None):
+        if unit:
             Node.__init__(self,
-                afu.dataset.name,
+                unit.dataset.name,
                 'dataset',
-                afu.dataset)
-            nodes = self.__nodes_from_afu(afu)
+                unit.dataset)
+            nodes = self.__nodes_from_unit(unit)
             for no_last, no_first in zip(
                     nodes[:-1], nodes[1:]):
-                no_last.children.append(no_first)
+                if isinstance(no_first, Node):
+                    no_last.children.append(no_first)
+                elif isinstance(no_first, list):
+                    no_last.children.extend(no_first)
             self.children.append(nodes[0])
-            logger.debug('%%%%%%%%%% Constructing graph from AFU')
+            logger.debug('%%%%%%%%%% Constructing graph from Unit')
 
-    def __nodes_from_afu(self, afu):
-        nodes = []
-        for selection in afu.selections:
+    def __nodes_from_unit(self, unit):
+        nodes = list()
+        last_node = list()
+        for selection in unit.selections:
             nodes.append(
                 Node(
                     selection.name,
                     'selection',
                     selection))
-        nodes.append(
-            Node(
-                afu.action.name,
-                'action',
-                afu.action))
+        for action in unit.actions:
+            last_node.append(
+                Node(
+                    action.name,
+                    'action',
+                    action))
+        nodes.append(last_node)
         return nodes
 
 
@@ -52,23 +58,22 @@ class GraphManager:
     optimize/merge them with the 'optimize' function.
 
     Args:
-        analysis_flow_units (list): List of AnalysisFlowUnit
-            objects used to fill the 'graphs' attribute
+        units (list): List of Unit objects used to
+            fill the 'graphs' attribute
 
     Attributes:
         graphs (list): List of Graph objects that at some point
             will be merged and optimized
     """
-    def __init__(self, analysis_flow_units):
+    def __init__(self, units):
         self.graphs = [
-            Graph(unit) \
-                for unit in analysis_flow_units]
+            Graph(unit) for unit in units]
 
     def add_graph(self, graph):
         self.graphs.append(graph)
 
-    def add_graph_from_afu(self, afu):
-        self.graphs.append(Graph(afu))
+    def add_graph_from_afu(self, unit):
+        self.graphs.append(Graph(unit))
 
     def optimize(self, level = 2):
         if int(level) == 0:
@@ -123,4 +128,3 @@ class GraphManager:
         print('Merged graphs:')
         for graph in self.graphs:
             print(graph)
-

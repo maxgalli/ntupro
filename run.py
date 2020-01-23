@@ -1,3 +1,6 @@
+from .utils import Count
+from .utils import Histogram
+
 from ROOT import RDataFrame
 from ROOT import TFile
 from ROOT import TChain
@@ -15,8 +18,8 @@ class RunManager:
     following:
         Dataset()     -->   RDataFrame()
         Selection()   -->   Filter()
-        BookCount()   -->   Sum()
-        BookHisto()   -->   Histo1D()
+        Count()   -->   Sum()
+        Histogram()   -->   Histo1D()
 
     Args:
         graphs (list): List of Graph objects that are converted
@@ -44,7 +47,7 @@ class RunManager:
             #logger.debug('Last used dataset called {}'.format(
                 #self._last_used_dataset))
             self.__node_to_root(graph)
-        logger.debug('%%%%%%%%%% Final pointers (histos and cunts): {}'.format(
+        logger.debug('%%%%%%%%%% Final pointers (histograms and counts): {}'.format(
             self.final_ptrs))
 
     def run_locally(self, of_name, update = False):
@@ -69,17 +72,17 @@ class RunManager:
             node))
         if node.kind == 'dataset':
             result = self.__rdf_from_dataset(
-                node.afu_block)
+                node.unit_block)
         elif node.kind == 'selection':
             result = self.__cuts_and_weights_from_selection(
-                rdf, node.afu_block)
+                rdf, node.unit_block)
         elif node.kind == 'action':
-            if 'Count' in node.name:
+            if isinstance(node.unit_block, Count):
                 result = self.__sum_from_count(
-                    rdf, node.afu_block)
-            elif 'Histo' in node.name:
+                    rdf, node.unit_block)
+            elif isinstance(node.unit_block, Histogram):
                 result = self.__histo1d_from_histo(
-                    rdf, node.afu_block, self._last_used_dataset)
+                    rdf, node.unit_block, self._last_used_dataset)
         if node.children:
             for child in node.children:
                 logger.debug('%%%%% __node_to_root, do not return; apply actions in "{}" on RDF "{}"'.format(
@@ -157,13 +160,13 @@ class RunManager:
             l_rdf = rdf
         return rdf
 
-    def __sum_from_count(self, rdf, book_count):
-        return rdf.Sum(book_count.variable)
+    def __sum_from_count(self, rdf, count):
+        return rdf.Sum(count.variable)
 
-    def __histo1d_from_histo(self, rdf, book_histo, dataset_name):
-        var = book_histo.variable
-        nbins = book_histo.binning.nbins
-        edges = book_histo.binning.edges
+    def __histo1d_from_histo(self, rdf, histogram, dataset_name):
+        var = histogram.variable
+        nbins = histogram.binning.nbins
+        edges = histogram.binning.edges
 
         # Get names of all the cuts applied, saved as rdf columns
         cut_prefix = '__selection__'
@@ -184,7 +187,7 @@ class RunManager:
         cut_expression = ' && '.join([
             name for name in rdf.GetColumnNames() if name.startswith(
                 '__cut__')])
-        logger.debug('%%%%%%%%%% Histo1D from histo: created cut expression {}'.format(
+        logger.debug('%%%%%%%%%% Histo1D from histogram: created cut expression {}'.format(
             cut_expression))
         if cut_expression:
             l_rdf = rdf.Filter(cut_expression)
@@ -207,7 +210,7 @@ class RunManager:
                     var)
         else:
             weight_name = 'Weight'
-            logger.debug('%%%%%%%%%% Histo1D from histo: defining {} column with weight expression {}'.format(
+            logger.debug('%%%%%%%%%% Histo1D from histogram: defining {} column with weight expression {}'.format(
                 weight_name, weight_expression))
             l_rdf = rdf.Define(weight_name, weight_expression)
             histo = l_rdf.Histo1D((

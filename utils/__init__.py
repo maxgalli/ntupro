@@ -1,9 +1,11 @@
 from ._booking import Friend
 from ._booking import Ntuple
 from ._booking import Dataset
+from ._booking import Cut
+from ._booking import Weight
 from ._booking import Selection
 from ._booking import Action
-from ._booking import BookCount
-from ._booking import BookHisto
+from ._booking import Count
+from ._booking import Histogram
 
 from ._optimization import Node
