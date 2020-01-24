@@ -143,6 +143,24 @@ class Selection:
             minimal_selections.append(s)
         return minimal_selections
 
+    def add_cut(self, cut_expression, cut_name):
+        self.cuts.append(Cut(
+            cut_expression, cut_name))
+
+    def add_weight(self, weight_expression, weight_name):
+        self.weights.append(Weight(
+            weight_expression, weight_name))
+
+    def remove_cut(self, cut_name):
+        for cut in self.cuts:
+            if cut.name is cut_name:
+                self.cuts.remove(cut)
+
+    def remove_weight(self, weight_name):
+        for weight in self.weights:
+            if weight.name is weight_name:
+                self.weights.remove(weight)
+
     def set_cuts(self, cuts):
         self.cuts = list()
         if cuts is not None:

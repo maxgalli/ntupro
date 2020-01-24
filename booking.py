@@ -2,9 +2,12 @@ from .utils import Dataset
 from .utils import Selection
 from .utils import Friend
 from .utils import Ntuple
+from .utils import Cut
 from .utils import Action
 from .utils import Count
 from .utils import Histogram
+
+from .variations import ReplaceCut
 
 from ROOT import TFile
 
@@ -163,8 +166,6 @@ class DatasetFromDatabase:
             tdf_tree = get_full_tree_name(
                 folder, root_file, 'ntuple')
             if tdf_tree:
-                #logger.debug('Get tree {} from file {}'.format(
-                    #tdf_tree, root_file))
                 friends = []
                 friend_paths = []
                 for friends_base_directory in friends_base_directories:
@@ -210,19 +211,25 @@ class Unit:
         selections (list): List of Selection-type objects
         actions (Action): Actions to perform on the processed
             dataset, can be 'Histogram' or 'Count'
+        variations (list): List of variations applied, meaning
+            that this selection is the result of some variations
+            applied on other selections
     """
     def __init__(
             self,
-            dataset, selections, actions):
+            dataset, selections, actions,
+            variations = None):
         self.__set_dataset(dataset)
         self.__set_selections(selections)
         self.__set_actions(actions)
+        self.variations = variations
 
     def __str__(self):
         layout = '\n'.join([
             'Dataset: {}'.format(self.dataset.name),
             'Selections: {}'.format(self.selections),
-            'Actions: {}'.format(self.actions)])
+            'Actions: {}'.format(self.actions),
+            'Variations: {}'.format(self.variations)])
         return layout
 
     def __set_dataset(self, dataset):
@@ -300,5 +307,30 @@ class UnitManager:
         self.booked_units = [arg for arg in args \
                 if isinstance(arg, Unit)]
 
-    def book(self, actions):
-        self.booked_units.extend(actions)
+    def book(self, units, variations = None):
+        self.booked_units.extend(units)
+        if variations:
+            for variation in variations:
+                logger.debug('Applying variation {}'.format(variation))
+                for unit in units:
+                    self.apply_variation(unit, variation)
+
+    def apply_variation(self, unit, variation):
+        new_selections = list()
+        for selection in unit.selections:
+            if isinstance(variation, ReplaceCut):
+                copy_cuts = list()
+                for cut in selection.cuts:
+                    if cut.name == variation.cut:
+                        logger.debug('Substitute {} with {} in selection {}'.format(
+                            cut.name, variation.name, selection))
+                        new_cut = Cut(variation.expression, cut.name)
+                        copy_cuts.append(new_cut)
+                    else:
+                        copy_cuts.append(cut)
+            new_selections.append(Selection(
+                selection.name,
+                copy_cuts,
+                selection.weights))
+        self.booked_units.append(Unit(
+            unit.dataset, new_selections, unit.actions))
