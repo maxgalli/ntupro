@@ -258,13 +258,26 @@ class Unit:
                     is_action = False
                     break
             if is_action:
-                self.actions = actions
+                self.actions = [self.__set_new_action(action) \
+                        for action in actions]
             else:
                 raise TypeError(
                    'TypeError: not Action objects.')
         else:
             raise TypeError(
                     'TypeError: not a list object.')
+
+    def __set_new_action(self, action):
+        name = '#'.join([action.variable,
+            self.dataset.name,
+            *[selection.name for selection in self.selections]])
+        if isinstance(action, Histogram):
+            name = '#'.join([name, action.binning.name])
+            return Histogram(
+                    action.variable, action.binning.edges,
+                    name)
+        elif isinstance(action, Count):
+            return Count(action.variable, name)
 
 
 class UnitManager:

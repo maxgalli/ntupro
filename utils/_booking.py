@@ -144,12 +144,12 @@ class Binning:
 
 class Action:
     def __init__(self,
-            name, variable):
-        self.name = name
+            variable, name = None):
         self.variable = variable
+        self.name = name
 
     def __str__(self):
-        return '{}-{}'.format(self.name, self.variable)
+        return  self.name
 
 
 class Count(Action):
@@ -158,9 +158,9 @@ class Count(Action):
 
 class Histogram(Action):
     def __init__(
-            self, name,
-            variable, edges = None):
-        Action.__init__(self, name, variable)
+            self, variable,
+            edges = None, name = None):
+        Action.__init__(self, variable, name)
         if isinstance(variable, Binning) and edges is None:
             self.binning = variable
         else:

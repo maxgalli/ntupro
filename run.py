@@ -130,49 +130,36 @@ class RunManager:
         return rdf
 
     def __cuts_and_weights_from_selection(self, rdf, selection):
-        # Also define a column with the name, to keep track and use in the histogram name
-        # Is it really the best solution?
-        #logger.debug('%%%%% Initial number of events for selection {}: {}'.format(
-            #selection.name, rdf.Count().GetValue()))
-        selection_name = '__selection__' + selection.name
-        logger.debug('%%%%% Defining fake column with selection name {}'.format(
-            selection_name))
-        l_rdf = rdf.Define(selection_name, '1')
         if selection.cuts:
             cut_name = '__cut__' + selection.name
             cut_expression = ' && '.join([cut.expression for cut in selection.cuts])
             logger.debug('%%%%% Definig merged cut {} column'.format(
                 cut_expression))
-            rdf = l_rdf.Define(
+            l_rdf = rdf.Define(
                 cut_name,
                 cut_expression)
-            l_rdf = rdf
+            rdf = l_rdf
         if selection.weights:
             weight_name = '__weight__' + selection.name
             weight_expression = '*'.join([
                 weight.expression for weight in selection.weights])
-            rdf = l_rdf.Define(
+            l_rdf = rdf.Define(
                 weight_name,
                 weight_expression)
             logger.debug('%%%%% Defining {} column with weight expression {}'.format(
                 weight_name,
                 weight_expression))
-            l_rdf = rdf
+            rdf = l_rdf
         return rdf
 
     def __sum_from_count(self, rdf, count):
         return rdf.Sum(count.variable)
 
     def __histo1d_from_histo(self, rdf, histogram, dataset_name):
-        var = histogram.variable
+        name = histogram.name
         nbins = histogram.binning.nbins
         edges = histogram.binning.edges
-
-        # Get names of all the cuts applied, saved as rdf columns
-        cut_prefix = '__selection__'
-        selection_names = '-'.join([
-            column[len(cut_prefix):] for column in rdf.GetColumnNames() \
-                    if column.startswith(cut_prefix)])
+        var = histogram.variable
 
         # Create macro weight string from sub-weights applied
         # (saved earlier as rdf columns)
@@ -197,12 +184,6 @@ class RunManager:
         l_edges = vector['double']()
         for edge in edges:
             l_edges.push_back(edge)
-
-        # Create histogram output name
-        name = '#'.join([var,
-            dataset_name,
-            selection_names,
-            str(nbins) + 'bins'])
 
         if not weight_expression:
             histo = rdf.Histo1D((
