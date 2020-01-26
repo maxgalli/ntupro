@@ -76,6 +76,10 @@ class Operation:
         self.expression = expression
         self.name = name
 
+    def __eq__(self, other):
+        return self.expression == other.expression and \
+            self.name == other.name
+
 
 class Cut(Operation):
     pass
@@ -100,6 +104,10 @@ class Selection:
         return self.name == other.name and \
             self.cuts == other.cuts and \
             self.weights == other.weights
+
+    def __hash__(self):
+        return hash((
+            self.name, tuple(self.cuts), tuple(self.weights)))
 
     def set_cuts(self, cuts):
         if cuts is not None:
