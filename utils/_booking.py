@@ -130,36 +130,36 @@ class Selection:
             self.name, tuple(self.cuts), tuple(self.weights)))
 
     def set_cuts(self, cuts):
+        self.cuts = list()
         if cuts is not None:
-            self.__check_format(cuts, Cut)
-            self.cuts = cuts
-        else:
-            self.cuts = []
+            if isinstance(cuts, list):
+                for cut in cuts:
+                    if isinstance(cut, Cut):
+                        self.cuts.append(cut)
+                    elif isinstance(cut, tuple):
+                        self.cuts.append(Cut(*cut))
+                    else:
+                        raise TypeError(
+                                'TypeError: Not a Cut object or tuple')
+            else:
+                raise TypeError(
+                        'TypeError: a list is needed.\n')
 
     def set_weights(self, weights):
+        self.weights = list()
         if weights is not None:
-            self.__check_format(weights, Weight)
-            self.weights = weights
-        else:
-            self.weights = []
-
-    def __check_format(self, lst, operation):
-        if isinstance(lst, list):
-            for ob in lst:
-                if isinstance(ob, tuple)\
-                        and len(ob) == 2:
-                    lst[lst.index(ob)] = operation(*ob)
-                    ret_value = True
-                elif isinstance(ob, operation):
-                    ret_value = True
-                else:
-                    raise TypeError(
-                            'TypeError: pass 2-tuples or {} objects.\n'.format(
-                                str(operation)))
-        else:
-            raise TypeError(
-                    'TypeError: a list of tuples is needed.\n')
-        return ret_value
+            if isinstance(weights, list):
+                for weight in weights:
+                    if isinstance(weight, Weight):
+                        self.weights.append(weight)
+                    elif isinstance(weight, tuple):
+                        self.weights.append(Weight(*weight))
+                    else:
+                        raise TypeError(
+                                'TypeError: Not a Weight object or tuple')
+            else:
+                raise TypeError(
+                        'TypeError: a list is needed.\n')
 
 
 class Binning:
