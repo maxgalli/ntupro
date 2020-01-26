@@ -80,6 +80,10 @@ class Operation:
         return self.expression == other.expression and \
             self.name == other.name
 
+    def __hash__(self):
+        return hash((
+            self.expression, self.name))
+
 
 class Cut(Operation):
     def __str__(self):
