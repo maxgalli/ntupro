@@ -1,5 +1,6 @@
-from .booking import Unit
+from collections import Counter
 
+from .booking import Unit
 from .utils import Node
 
 import logging
@@ -16,9 +17,17 @@ class Graph(Node):
     Args:
         unit (Unit): unit object from which a graph
             in its basic form is generated
+        paths (dict): dictionary where the keys are
+            the names of the final actions performed
+            (histograms and counts) and the values
+            are lists containing the nodes in the
+            path that needs to be followed to reach
+            the action
     """
     def __init__(self, unit = None):
         if unit:
+            logger.debug('%%%%%%%%%% Constructing graph from Unit')
+            self.paths = dict()
             Node.__init__(self,
                 unit.dataset.name,
                 'dataset',
@@ -29,9 +38,26 @@ class Graph(Node):
                 if isinstance(no_first, Node):
                     no_last.children.append(no_first)
                 elif isinstance(no_first, list):
-                    no_last.children.extend(no_first)
+                    for action in no_first:
+                        no_last.children.append(no_first)
+                        self.paths[action.name] = nodes[:-1]
+            logger.debug('%%%%%%%%%% Path for Unit: {}'.format(self.paths))
             self.children.append(nodes[0])
-            logger.debug('%%%%%%%%%% Constructing graph from Unit')
+
+    def compute_nodes_priorities(self):
+        """ Compute priorities for all the nodes in the
+        graph. Useful for complex graphs during the
+        swapping of the nodes in the optimization part.
+        """
+        priority = Counter()
+        for path in self.paths.values():
+            priority.update(path)
+        for node, number in priority.items():
+            if number == len(self.paths):
+                for path in self.paths.values():
+                    number += (len(path) - path.index(node))
+                    priority[node] = number
+        return priority
 
     def __nodes_from_unit(self, unit):
         nodes = list()
@@ -72,7 +98,7 @@ class GraphManager:
     def add_graph(self, graph):
         self.graphs.append(graph)
 
-    def add_graph_from_afu(self, unit):
+    def add_graph_from_unit(self, unit):
         self.graphs.append(Graph(unit))
 
     def optimize(self, level = 2):
@@ -99,6 +125,7 @@ class GraphManager:
             else:
                 for merged_graph in merged_graphs:
                     if merged_graph == graph:
+                        merged_graph.paths.update(graph.paths)
                         for child in graph.children:
                             merged_graph.children.append(child)
         self.graphs = merged_graphs
@@ -107,20 +134,9 @@ class GraphManager:
 
     def optimize_selections(self):
         logger.debug('%%%%%%%%%% Optimizing selections:')
-        def _merge_children(node):
-            merged_children = list()
-            for child in node.children:
-                if child not in merged_children:
-                    merged_children.append(child)
-                else:
-                    merged_children[merged_children.index(
-                        child)].children.extend(
-                            child.children)
-            node.children = merged_children
-            for child in node.children:
-                _merge_children(child)
         for merged_graph in self.graphs:
-            _merge_children(merged_graph)
+            self._swap_children(merged_graph)
+            self._merge_children(merged_graph)
         logger.debug('%%%%%%%%%% Optimizing selections: DONE')
         self.print_merged_graphs()
 
@@ -128,3 +144,41 @@ class GraphManager:
         print('Merged graphs:')
         for graph in self.graphs:
             print(graph)
+            print('Paths: ', graph.paths)
+
+    def _swap_children(self, node):
+        priority = node.compute_nodes_priorities()
+        logger.debug('Computed priorities {}'.format(priority))
+        logger.debug('Swapping children in branches of root node {}'.format(
+            node.__repr__()))
+        for steps in node.paths.values():
+            steps = steps.sort(key = lambda n: priority[n], reverse = True)
+        node.children.clear()
+        for steps in node.paths.values():
+            for step in steps:
+                step.children.clear()
+            for no_last, no_first in zip(steps[:-1],
+                    steps[1:]):
+                no_last.children.append(no_first)
+        node.children.extend([steps[0] for steps in node.paths.values()])
+        logger.debug('DONE swapping for {}, new children: {}'.format(
+            node.__repr__(), node.children))
+
+    def _merge_children(self, node):
+        '''For every node, loops through the children
+        and merges the ones that are equal, by appending
+        the children of the new spotted ones to the
+        children of the first spotted.
+        '''
+        merged_children = list()
+        for child in node.children:
+            if child not in merged_children:
+                merged_children.append(child)
+            else:
+                merged_children[merged_children.index(
+                    child)].children.extend(
+                        child.children)
+        node.children = merged_children
+        for child in node.children:
+            self._merge_children(child)
+
