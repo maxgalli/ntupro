@@ -82,11 +82,31 @@ class Operation:
 
 
 class Cut(Operation):
-    pass
+    def __str__(self):
+        layout = 'C(' + self.name \
+                + ', ' + self.expression \
+                + ')'
+        return layout
+
+    def __repr__(self):
+        layout = 'C(' + self.name \
+                + ', ' + self.expression \
+                + ')'
+        return layout
 
 
 class Weight(Operation):
-    pass
+    def __str__(self):
+        layout = 'W(' + self.name \
+                + ', ' + self.expression \
+                + ')'
+        return layout
+
+    def __repr__(self):
+        layout = 'W(' + self.name \
+                + ', ' + self.expression \
+                + ')'
+        return layout
 
 
 class Selection:
