@@ -24,25 +24,25 @@ class Graph(Node):
             path that needs to be followed to reach
             the action
     """
-    def __init__(self, unit = None):
-        if unit:
-            logger.debug('%%%%%%%%%% Constructing graph from Unit')
-            self.paths = dict()
-            Node.__init__(self,
-                unit.dataset.name,
-                'dataset',
-                unit.dataset)
-            nodes = self.__nodes_from_unit(unit)
-            for no_last, no_first in zip(
-                    nodes[:-1], nodes[1:]):
-                if isinstance(no_first, Node):
+    def __init__(self, unit, split_selections = False):
+        logger.debug('%%%%%%%%%% Constructing graph from Unit')
+        self.paths = dict()
+        self.split_selections = split_selections
+        Node.__init__(self,
+            unit.dataset.name,
+            'dataset',
+            unit.dataset)
+        nodes = self.__nodes_from_unit(unit)
+        for no_last, no_first in zip(
+                nodes[:-1], nodes[1:]):
+            if isinstance(no_first, Node):
+                no_last.children.append(no_first)
+            elif isinstance(no_first, list):
+                for action in no_first:
                     no_last.children.append(no_first)
-                elif isinstance(no_first, list):
-                    for action in no_first:
-                        no_last.children.append(no_first)
-                        self.paths[action.name] = nodes[:-1]
-            logger.debug('%%%%%%%%%% Path for Unit: {}'.format(self.paths))
-            self.children.append(nodes[0])
+                    self.paths[action.name] = nodes[:-1]
+        logger.debug('%%%%%%%%%% Path for Unit: {}'.format(self.paths))
+        self.children.append(nodes[0])
 
     def compute_nodes_priorities(self):
         """ Compute priorities for all the nodes in the
@@ -63,11 +63,20 @@ class Graph(Node):
         nodes = list()
         last_node = list()
         for selection in unit.selections:
-            nodes.append(
-                Node(
-                    selection.name,
-                    'selection',
-                    selection))
+            if self.split_selections:
+                sub_selections = selection.split()
+                for sub_selection in sub_selections:
+                    nodes.append(
+                        Node(
+                            sub_selection.name,
+                            'selection',
+                            sub_selection))
+            else:
+                nodes.append(
+                    Node(
+                        selection.name,
+                        'selection',
+                        selection))
         for action in unit.actions:
             last_node.append(
                 Node(
@@ -91,9 +100,9 @@ class GraphManager:
         graphs (list): List of Graph objects that at some point
             will be merged and optimized
     """
-    def __init__(self, units):
+    def __init__(self, units, split_selections = False):
         self.graphs = [
-            Graph(unit) for unit in units]
+            Graph(unit, split_selections) for unit in units]
 
     def add_graph(self, graph):
         self.graphs.append(graph)
