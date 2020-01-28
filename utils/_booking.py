@@ -133,6 +133,16 @@ class Selection:
         return hash((
             self.name, tuple(self.cuts), tuple(self.weights)))
 
+    def split(self):
+        minimal_selections = list()
+        for cut in self.cuts:
+            s = Selection(name = cut.name, cuts = [cut])
+            minimal_selections.append(s)
+        for weight in self.weights:
+            s = Selection(name = weight.name, weights = [weight])
+            minimal_selections.append(s)
+        return minimal_selections
+
     def set_cuts(self, cuts):
         self.cuts = list()
         if cuts is not None:
