@@ -328,9 +328,23 @@ class UnitManager:
                         copy_cuts.append(new_cut)
                     else:
                         copy_cuts.append(cut)
-            new_selections.append(Selection(
-                selection.name,
-                copy_cuts,
-                selection.weights))
+                new_selections.append(Selection(
+                    selection.name,
+                    copy_cuts,
+                    selection.weights))
+            elif isinstance(variation, ReplaceWeight):
+                copy_weights = list()
+                for weight in selection.weights:
+                    if weight.name == variation.weight:
+                        logger.debug('Substitute {} with {} in selection {}'.format(
+                            weight.name, variation.name, selection))
+                        new_weight = Cut(variation.expression, weight.name)
+                        copy_weights.append(new_weight)
+                    else:
+                        copy_weights.append(weight)
+                new_selections.append(Selection(
+                    selection.name,
+                    selection.weights,
+                    copy_weights))
         self.booked_units.append(Unit(
             unit.dataset, new_selections, unit.actions))

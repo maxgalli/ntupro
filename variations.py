@@ -1,8 +1,7 @@
-class ReplaceCut:
+class Replace:
     def __init__(self,
-            name, cut, expression):
+            name, expression):
         self.name = name
-        self.cut = cut
         self.expression = expression
 
     def __str__(self):
@@ -11,3 +10,14 @@ class ReplaceCut:
                 + ')'
         return layout
 
+class ReplaceCut(Replace):
+    def __init__(self,
+            name, cut, expression):
+        Replace.__init__(self, name, expression)
+        self.cut = cut
+
+class ReplaceWeight(Replace):
+    def __init__(self,
+            name, cut, expression):
+        Replace.__init__(self, name, expression)
+        self.weight = weight
