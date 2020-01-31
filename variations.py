@@ -21,3 +21,17 @@ class ReplaceWeight(Replace):
             name, cut, expression):
         Replace.__init__(self, name, expression)
         self.weight = weight
+
+class RemoveCut:
+    def __init__(self, cut):
+        self.cut = cut
+
+    def __str__(self):
+        return '(x-' + self.cut + ')'
+
+class RemoveCut:
+    def __init__(self, weight):
+        self.weight = weight
+
+    def __str__(self):
+        return '(x-' + self.weight + ')'

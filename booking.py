@@ -346,5 +346,10 @@ class UnitManager:
                     selection.name,
                     selection.weights,
                     copy_weights))
-        self.booked_units.append(Unit(
-            unit.dataset, new_selections, unit.actions))
+            elif isinstance(variation, RemoveCut):
+                selection.remove_cut(variation.cut.name)
+            elif isinstance(variation, RemoveWeight):
+                selection.remove_weight(variation.weight.name)
+        if new_selections:
+            self.booked_units.append(Unit(
+                unit.dataset, new_selections, unit.actions))
