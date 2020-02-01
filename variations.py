@@ -1,3 +1,10 @@
+class ChangeDataset:
+    def __init__(self, dataset):
+        self.dataset = dataset
+
+    def __str__(self):
+        return '(D-' + self.dataset + ')'
+
 class Replace:
     def __init__(self,
             name, expression):

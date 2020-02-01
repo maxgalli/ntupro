@@ -316,9 +316,12 @@ class UnitManager:
                     self.apply_variation(unit, variation)
 
     def apply_variation(self, unit, variation):
-        new_selections = list()
         for selection in unit.selections:
-            if isinstance(variation, ReplaceCut):
+            if isinstance(variation, ChangeDataset):
+                self.booked_units.append(Unit(
+                    variation.dataset, unit.selections, unit.actions))
+            elif isinstance(variation, ReplaceCut):
+                new_selections = list()
                 copy_cuts = list()
                 for cut in selection.cuts:
                     if cut.name == variation.cut:
@@ -332,7 +335,10 @@ class UnitManager:
                     selection.name,
                     copy_cuts,
                     selection.weights))
+                self.booked_units.append(Unit(
+                    unit.dataset, new_selections, unit.actions))
             elif isinstance(variation, ReplaceWeight):
+                new_selections = list()
                 copy_weights = list()
                 for weight in selection.weights:
                     if weight.name == variation.weight:
@@ -346,10 +352,9 @@ class UnitManager:
                     selection.name,
                     selection.weights,
                     copy_weights))
+                self.booked_units.append(Unit(
+                    unit.dataset, new_selections, unit.actions))
             elif isinstance(variation, RemoveCut):
                 selection.remove_cut(variation.cut.name)
             elif isinstance(variation, RemoveWeight):
                 selection.remove_weight(variation.weight.name)
-        if new_selections:
-            self.booked_units.append(Unit(
-                unit.dataset, new_selections, unit.actions))
