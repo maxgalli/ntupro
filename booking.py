@@ -366,3 +366,17 @@ class UnitManager:
                     selection.remove_weight(variation.weight.name)
                 self.booked_units.append(Unit(
                     unit.dataset, new_selections, unit.actions))
+            elif isinstance(variation, AddCut):
+                new_selections = [selection for selection in unit.selections]
+                new_selections.append(Selection(
+                    name = variation.name, cuts = [Cut(
+                        variation.expression, variation.name)]))
+                self.booked_units.append(Unit(
+                    unit.dataset, new_selections, unit.actions))
+            elif isinstance(variation, AddWeight):
+                new_selections = [selection for selection in unit.selections]
+                new_selections.append(Selection(
+                    name = variation.name, weights = [Weight(
+                        variation.expression, variation.name)]))
+                self.booked_units.append(Unit(
+                    unit.dataset, new_selections, unit.actions))

@@ -42,3 +42,21 @@ class RemoveCut:
 
     def __str__(self):
         return '(x-' + self.weight + ')'
+
+class Add:
+    def __init__(self,
+            name, expression):
+        self.name = name
+        self.expression = expression
+
+    def __str__(self):
+        layout = '(+' + self.name \
+                + ', ' + self.expression \
+                + ')'
+        return layout
+
+class AddCut(Add):
+    pass
+
+class AddWeight(Add):
+    pass
