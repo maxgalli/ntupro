@@ -217,8 +217,8 @@ class Unit:
         selections (list): List of Selection-type objects
         actions (Action): Actions to perform on the processed
             dataset, can be 'Histogram' or 'Count'
-        variations (list): List of variations applied, meaning
-            that this selection is the result of some variations
+        variation (): Variations applied, meaning
+            that this selection is the result of a variation
             applied on other selections
     """
     def __init__(
@@ -228,7 +228,7 @@ class Unit:
         self.__set_dataset(dataset)
         self.__set_selections(selections)
         self.__set_actions(actions)
-        self.variations = variations
+        self.__set_variation(variation)
 
     def __str__(self):
         layout = '\n'.join([
@@ -292,6 +292,10 @@ class Unit:
         elif isinstance(action, Count):
             return Count(action.variable, name)
 
+    def __set_variation(self, variation):
+        self.variation = variation
+        for action in self.actions:
+            action.name = '#'.join([action.name, self.variation.name])
 
 class UnitManager:
     """
@@ -313,19 +317,18 @@ class UnitManager:
         self.booked_units = [arg for arg in args \
                 if isinstance(arg, Unit)]
 
-    def book(self, units, variations = None):
+    def book(self, units, variation = None):
         self.booked_units.extend(units)
-        if variations:
-            for variation in variations:
-                logger.debug('Applying variation {}'.format(variation))
-                for unit in units:
-                    self.apply_variation(unit, variation)
+        if variation:
+            logger.debug('Applying variation {}'.format(variation))
+            for unit in units:
+                self.apply_variation(unit, variation)
 
     def apply_variation(self, unit, variation):
         for selection in unit.selections:
             if isinstance(variation, ChangeDataset):
                 self.booked_units.append(Unit(
-                    variation.dataset, unit.selections, unit.actions))
+                    variation.dataset, unit.selections, unit.actions, [variation]))
             elif isinstance(variation, ReplaceCut):
                 new_selections = list()
                 copy_cuts = list()
@@ -342,7 +345,7 @@ class UnitManager:
                     copy_cuts,
                     selection.weights))
                 self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions))
+                    unit.dataset, new_selections, unit.actions, [variation]))
             elif isinstance(variation, ReplaceWeight):
                 new_selections = list()
                 copy_weights = list()
@@ -359,30 +362,30 @@ class UnitManager:
                     selection.weights,
                     copy_weights))
                 self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions))
+                    unit.dataset, new_selections, unit.actions, [variation]))
             elif isinstance(variation, RemoveCut):
                 new_selections = [selection for selection in unit.selections]
                 for new_selection in new_selections:
                     selection.remove_cut(variation.cut.name)
                 self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions))
+                    unit.dataset, new_selections, unit.actions, [variation]))
             elif isinstance(variation, RemoveWeight):
                 new_selections = [selection for selection in unit.selections]
                 for new_selection in new_selections:
                     selection.remove_weight(variation.weight.name)
                 self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions))
+                    unit.dataset, new_selections, unit.actions, [variation]))
             elif isinstance(variation, AddCut):
                 new_selections = [selection for selection in unit.selections]
                 new_selections.append(Selection(
                     name = variation.name, cuts = [Cut(
                         variation.expression, variation.name)]))
                 self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions))
+                    unit.dataset, new_selections, unit.actions, [variation]))
             elif isinstance(variation, AddWeight):
                 new_selections = [selection for selection in unit.selections]
                 new_selections.append(Selection(
                     name = variation.name, weights = [Weight(
                         variation.expression, variation.name)]))
                 self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions))
+                    unit.dataset, new_selections, unit.actions, [variation]))
