@@ -7,7 +7,13 @@ from .utils import Action
 from .utils import Count
 from .utils import Histogram
 
+from .variations import ChangeDataset
 from .variations import ReplaceCut
+from .variations import ReplaceWeight
+from .variations import RemoveCut
+from .variations import RemoveWeight
+from .variations import AddCut
+from .variations import AddWeight
 
 from ROOT import TFile
 
