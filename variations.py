@@ -1,62 +1,76 @@
 class ChangeDataset:
-    def __init__(self, dataset):
+    def __init__(self,
+            var_name, dataset):
+        self.name = var_name
         self.dataset = dataset
 
     def __str__(self):
-        return '(D-' + self.dataset + ')'
+        return self.name
+
+    def __repr__(self):
+        return self.name
 
 class Replace:
     def __init__(self,
-            name, expression):
-        self.name = name
-        self.expression = expression
+            var_name, replaced_name):
+        self.name = var_name
+        self.replaced_name = replaced_name
 
     def __str__(self):
-        layout = '(' + self.name \
-                + ', ' + self.expression \
-                + ')'
-        return layout
+        return self.name
+
+    def __repr__(self):
+        return self.name
 
 class ReplaceCut(Replace):
     def __init__(self,
-            name, cut, expression):
-        Replace.__init__(self, name, expression)
+            var_name, replaced_name, cut):
+        Replace.__init__(self, var_name, replaced_name)
         self.cut = cut
 
 class ReplaceWeight(Replace):
     def __init__(self,
-            name, cut, expression):
-        Replace.__init__(self, name, expression)
+            var_name, replaced_name, weight):
+        Replace.__init__(self, var_name, replaced_name)
         self.weight = weight
 
-class RemoveCut:
-    def __init__(self, cut):
-        self.cut = cut
+class Remove:
+    def __init__(self,
+            var_name, removed_name):
+        self.name = var_name
+        self.removed_name = removed_name
 
     def __str__(self):
-        return '(x-' + self.cut + ')'
+        return self.name
 
-class RemoveCut:
-    def __init__(self, weight):
-        self.weight = weight
+    def __repr__(self):
+        return self.name
 
-    def __str__(self):
-        return '(x-' + self.weight + ')'
+class RemoveCut(Remove):
+    pass
+
+class RemoveWeight(Remove):
+    pass
 
 class Add:
-    def __init__(self,
-            name, expression):
-        self.name = name
-        self.expression = expression
+    def __init__(self, var_name):
+        self.name = var_name
 
     def __str__(self):
-        layout = '(+' + self.name \
-                + ', ' + self.expression \
-                + ')'
-        return layout
+        return self.name
+
+    def __repr__(self):
+        return self.name
 
 class AddCut(Add):
-    pass
+    def __init__(self,
+            var_name, cut):
+        Add.__init__(self, var_name)
+        self.cut = cut
 
 class AddWeight(Add):
-    pass
+    def __init__(self,
+            var_name, weight):
+        Add.__init__(self, var_name)
+        self.weight = weight
+

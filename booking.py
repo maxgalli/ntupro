@@ -325,67 +325,64 @@ class UnitManager:
                 self.apply_variation(unit, variation)
 
     def apply_variation(self, unit, variation):
-        for selection in unit.selections:
-            if isinstance(variation, ChangeDataset):
-                self.booked_units.append(Unit(
-                    variation.dataset, unit.selections, unit.actions, [variation]))
-            elif isinstance(variation, ReplaceCut):
-                new_selections = list()
+        if isinstance(variation, ChangeDataset):
+            self.booked_units.append(Unit(
+                variation.dataset, unit.selections, unit.actions, variation))
+        elif isinstance(variation, ReplaceCut):
+            new_selections = list()
+            for selection in unit.selections:
                 copy_cuts = list()
                 for cut in selection.cuts:
-                    if cut.name == variation.cut:
+                    if cut.name == variation.replaced_name:
                         logger.debug('Substitute {} with {} in selection {}'.format(
-                            cut.name, variation.name, selection))
-                        new_cut = Cut(variation.expression, cut.name)
-                        copy_cuts.append(new_cut)
+                            cut, variation.cut, selection))
+                        copy_cuts.append(variation.cut)
                     else:
                         copy_cuts.append(cut)
                 new_selections.append(Selection(
                     selection.name,
                     copy_cuts,
                     selection.weights))
-                self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions, [variation]))
-            elif isinstance(variation, ReplaceWeight):
-                new_selections = list()
+            self.booked_units.append(Unit(
+                unit.dataset, new_selections, unit.actions, variation))
+        elif isinstance(variation, ReplaceWeight):
+            new_selections = list()
+            for selection in unit.selections:
                 copy_weights = list()
                 for weight in selection.weights:
-                    if weight.name == variation.weight:
+                    if weight.name == variation.replaced_name:
                         logger.debug('Substitute {} with {} in selection {}'.format(
-                            weight.name, variation.name, selection))
-                        new_weight = Cut(variation.expression, weight.name)
-                        copy_weights.append(new_weight)
+                            weight, variation.weight, selection))
+                        copy_weights.append(variation.weight)
                     else:
                         copy_weights.append(weight)
                 new_selections.append(Selection(
                     selection.name,
-                    selection.weights,
+                    selection.cuts,
                     copy_weights))
-                self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions, [variation]))
-            elif isinstance(variation, RemoveCut):
-                new_selections = [selection for selection in unit.selections]
-                for new_selection in new_selections:
-                    selection.remove_cut(variation.cut.name)
-                self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions, [variation]))
-            elif isinstance(variation, RemoveWeight):
-                new_selections = [selection for selection in unit.selections]
-                for new_selection in new_selections:
-                    selection.remove_weight(variation.weight.name)
-                self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions, [variation]))
-            elif isinstance(variation, AddCut):
-                new_selections = [selection for selection in unit.selections]
-                new_selections.append(Selection(
-                    name = variation.name, cuts = [Cut(
-                        variation.expression, variation.name)]))
-                self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions, [variation]))
-            elif isinstance(variation, AddWeight):
-                new_selections = [selection for selection in unit.selections]
-                new_selections.append(Selection(
-                    name = variation.name, weights = [Weight(
-                        variation.expression, variation.name)]))
-                self.booked_units.append(Unit(
-                    unit.dataset, new_selections, unit.actions, [variation]))
+            self.booked_units.append(Unit(
+                unit.dataset, new_selections, unit.actions, variation))
+        elif isinstance(variation, RemoveCut):
+            new_selections = [selection for selection in unit.selections]
+            for new_selection in new_selections:
+                selection.remove_cut(variation.removed_name)
+            self.booked_units.append(Unit(
+                unit.dataset, new_selections, unit.actions, variation))
+        elif isinstance(variation, RemoveWeight):
+            new_selections = [selection for selection in unit.selections]
+            for new_selection in new_selections:
+                selection.remove_weight(variation.removed_name)
+            self.booked_units.append(Unit(
+                unit.dataset, new_selections, unit.actions, variation))
+        elif isinstance(variation, AddCut):
+            new_selections = [selection for selection in unit.selections]
+            new_selections.append(Selection(
+                name = variation.cut.name, cuts = [variation.cut]))
+            self.booked_units.append(Unit(
+                unit.dataset, new_selections, unit.actions, variation))
+        elif isinstance(variation, AddWeight):
+            new_selections = [selection for selection in unit.selections]
+            new_selections.append(Selection(
+                name = variation.weight.name, weights = [variation.weight]))
+            self.booked_units.append(Unit(
+                unit.dataset, new_selections, unit.actions, variation))
