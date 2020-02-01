@@ -355,6 +355,14 @@ class UnitManager:
                 self.booked_units.append(Unit(
                     unit.dataset, new_selections, unit.actions))
             elif isinstance(variation, RemoveCut):
-                selection.remove_cut(variation.cut.name)
+                new_selections = [selection for selection in unit.selections]
+                for new_selection in new_selections:
+                    selection.remove_cut(variation.cut.name)
+                self.booked_units.append(Unit(
+                    unit.dataset, new_selections, unit.actions))
             elif isinstance(variation, RemoveWeight):
-                selection.remove_weight(variation.weight.name)
+                new_selections = [selection for selection in unit.selections]
+                for new_selection in new_selections:
+                    selection.remove_weight(variation.weight.name)
+                self.booked_units.append(Unit(
+                    unit.dataset, new_selections, unit.actions))
