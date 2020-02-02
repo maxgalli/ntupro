@@ -58,16 +58,26 @@ class Ntuple(NtupleBase):
 
 class Dataset:
 
-    def __init__(self, name, ntuples):
+    def __init__(self, name, ntuples,
+            *build_info):
         self.name = name
         self.ntuples = ntuples
+        if build_info:
+            self.__set_build_info(*build_info)
 
     def __str__(self):
         return 'Dataset-{}'.format(self.name)
 
-    def add_to_ntuples(*new_ntuples):
+    def add_to_ntuples(self, *new_ntuples):
         for new_ntuple in new_ntuples:
             self.ntuples.append(new_ntuple)
+
+    def __set_build_info(self, *build_info):
+        self._build_info = dict()
+        keys = ['path_to_database', 'queries', 'folder',
+                'files_base_directories', 'friends_base_directories']
+        for key, info in zip(keys, build_info):
+            self._build_info[key] = info
 
 
 class Operation:

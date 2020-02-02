@@ -188,7 +188,12 @@ class DatasetFromDatabase:
                             'File {} does not exist, abort'.format(
                                 friend_path))
                 ntuples.append(Ntuple(root_file, tdf_tree, friends))
-        dataset = Dataset(dataset_name, ntuples)
+        dataset = Dataset(dataset_name, ntuples,
+                path_to_database,
+                queries,
+                folder,
+                files_base_directories,
+                friends_base_directories)
 
         # Debug
         def debug_dataset():
@@ -224,18 +229,19 @@ class Unit:
     def __init__(
             self,
             dataset, selections, actions,
-            variations = None):
+            variation = None):
         self.__set_dataset(dataset)
         self.__set_selections(selections)
         self.__set_actions(actions)
-        self.__set_variation(variation)
+        if variation is not None:
+            self.__set_variation(variation)
 
     def __str__(self):
         layout = '\n'.join([
             'Dataset: {}'.format(self.dataset.name),
             'Selections: {}'.format(self.selections),
             'Actions: {}'.format(self.actions),
-            'Variations: {}'.format(self.variations)])
+            'Variations: {}'.format(self.variation)])
         return layout
 
     def __set_dataset(self, dataset):
@@ -326,8 +332,15 @@ class UnitManager:
 
     def apply_variation(self, unit, variation):
         if isinstance(variation, ChangeDataset):
+            new_dataset = dataset_from_database(
+                    variation.folder_name,
+                    unit.dataset._build_info['path_to_database'],
+                    unit.dataset._build_info['queries'],
+                    variation.folder_name,
+                    unit.dataset._build_info['files_base_directories'],
+                    unit.dataset._build_info['friends_base_directories'])
             self.booked_units.append(Unit(
-                variation.dataset, unit.selections, unit.actions, variation))
+                new_dataset, unit.selections, unit.actions, variation))
         elif isinstance(variation, ReplaceCut):
             new_selections = list()
             for selection in unit.selections:
