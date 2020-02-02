@@ -133,23 +133,21 @@ class RunManager:
         if selection.cuts:
             cut_name = '__cut__' + selection.name
             cut_expression = ' && '.join([cut.expression for cut in selection.cuts])
-            logger.debug('%%%%% Definig merged cut {} column'.format(
+            logger.debug('%%%%% Defining merged cut {} column'.format(
                 cut_expression))
-            l_rdf = rdf.Define(
+            rdf = rdf.Define(
                 cut_name,
                 cut_expression)
-            rdf = l_rdf
         if selection.weights:
             weight_name = '__weight__' + selection.name
             weight_expression = '*'.join([
                 weight.expression for weight in selection.weights])
-            l_rdf = rdf.Define(
+            rdf = rdf.Define(
                 weight_name,
                 weight_expression)
             logger.debug('%%%%% Defining {} column with weight expression {}'.format(
                 weight_name,
                 weight_expression))
-            rdf = l_rdf
         return rdf
 
     def __sum_from_count(self, rdf, count):
@@ -177,8 +175,7 @@ class RunManager:
         logger.debug('%%%%%%%%%% Histo1D from histogram: created cut expression {}'.format(
             cut_expression))
         if cut_expression:
-            l_rdf = rdf.Filter(cut_expression)
-            rdf = l_rdf
+            rdf = rdf.Filter(cut_expression)
 
         # Create std::vector with the histogram edges
         l_edges = vector['double']()
@@ -186,15 +183,17 @@ class RunManager:
             l_edges.push_back(edge)
 
         if not weight_expression:
+            logger.debug('%%%%%%%%%% Attaching histogram called {}'.format(name))
             histo = rdf.Histo1D((
                     name, name, nbins, l_edges.data()),
                     var)
         else:
-            weight_name = 'Weight'
+            weight_name = 'TotalWeight'
             logger.debug('%%%%%%%%%% Histo1D from histogram: defining {} column with weight expression {}'.format(
                 weight_name, weight_expression))
-            l_rdf = rdf.Define(weight_name, weight_expression)
-            histo = l_rdf.Histo1D((
+            rdf = rdf.Define(weight_name, weight_expression)
+            logger.debug('%%%%%%%%%% Attaching histogram called {}'.format(name))
+            histo = rdf.Histo1D((
                 name, name, nbins, l_edges.data()),
                 var, weight_expression)
 
