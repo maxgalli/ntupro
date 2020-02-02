@@ -39,7 +39,7 @@ class Graph(Node):
                 no_last.children.append(no_first)
             elif isinstance(no_first, list):
                 for action in no_first:
-                    no_last.children.append(no_first)
+                    no_last.children.append(action)
                     self.paths[action.name] = nodes[:-1]
         logger.debug('%%%%%%%%%% Path for Unit: {}'.format(self.paths))
         self.children.append(nodes[0])
