@@ -33,16 +33,21 @@ class Graph(Node):
             'dataset',
             unit.dataset)
         nodes = self.__nodes_from_unit(unit)
-        for no_last, no_first in zip(
-                nodes[:-1], nodes[1:]):
-            if isinstance(no_first, Node):
-                no_last.children.append(no_first)
-            elif isinstance(no_first, list):
-                for action in no_first:
-                    no_last.children.append(action)
-                    self.paths[action] = nodes[:-1]
-        logger.debug('%%%%%%%%%% Path for Unit: {}'.format(self.paths))
-        self.children.append(nodes[0])
+        if len(nodes) > 1:
+            for no_last, no_first in zip(
+                    nodes[:-1], nodes[1:]):
+                if isinstance(no_first, Node):
+                    no_last.children.append(no_first)
+                elif isinstance(no_first, list):
+                    for action in no_first:
+                        no_last.children.append(action)
+                        self.paths[action] = nodes[:-1]
+            logger.debug('%%%%%%%%%% Path for Unit: {}'.format(self.paths))
+            self.children.append(nodes[0])
+        else:
+            # no-selections case: the only element of nodes is the
+            # list of actions
+            self.children.extend(nodes[0])
 
     def compute_nodes_priorities(self):
         """ Compute priorities for all the nodes in the
@@ -157,24 +162,26 @@ class GraphManager:
 
     def _swap_children(self, node):
         priority = node.compute_nodes_priorities()
-        logger.debug('Computed priorities {}'.format(priority))
-        logger.debug('Swapping children in branches of root node {}'.format(
-            node.__repr__()))
-        for steps in node.paths.values():
-            steps = steps.sort(key = lambda n: priority[n], reverse = True)
-        node.children.clear()
-        for action, steps in node.paths.items():
-            for step in steps:
-                step.children.clear()
-            for no_last, no_first in zip(steps[:-1],
-                    steps[1:]):
-                no_last.children.append(no_first)
-            for step in steps:
-                if not step.children:
-                    step.children.append(action)
-        node.children.extend([steps[0] for steps in node.paths.values()])
-        logger.debug('DONE swapping for {}, new children: {}'.format(
-            node.__repr__(), node.children))
+        if priority:
+            # Empty priority means no selections in Unity
+            logger.debug('Computed priorities {}'.format(priority))
+            logger.debug('Swapping children in branches of root node {}'.format(
+                node.__repr__()))
+            for steps in node.paths.values():
+                steps = steps.sort(key = lambda n: priority[n], reverse = True)
+            node.children.clear()
+            for action, steps in node.paths.items():
+                for step in steps:
+                    step.children.clear()
+                for no_last, no_first in zip(steps[:-1],
+                        steps[1:]):
+                    no_last.children.append(no_first)
+                for step in steps:
+                    if not step.children:
+                        step.children.append(action)
+            node.children.extend([steps[0] for steps in node.paths.values()])
+            logger.debug('DONE swapping for {}, new children: {}'.format(
+                node.__repr__(), node.children))
 
     def _merge_children(self, node):
         '''For every node, loops through the children
