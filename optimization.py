@@ -40,7 +40,7 @@ class Graph(Node):
             elif isinstance(no_first, list):
                 for action in no_first:
                     no_last.children.append(action)
-                    self.paths[action.name] = nodes[:-1]
+                    self.paths[action] = nodes[:-1]
         logger.debug('%%%%%%%%%% Path for Unit: {}'.format(self.paths))
         self.children.append(nodes[0])
 
@@ -163,12 +163,15 @@ class GraphManager:
         for steps in node.paths.values():
             steps = steps.sort(key = lambda n: priority[n], reverse = True)
         node.children.clear()
-        for steps in node.paths.values():
+        for action, steps in node.paths.items():
             for step in steps:
                 step.children.clear()
             for no_last, no_first in zip(steps[:-1],
                     steps[1:]):
                 no_last.children.append(no_first)
+            for step in steps:
+                if not step.children:
+                    step.children.append(action)
         node.children.extend([steps[0] for steps in node.paths.values()])
         logger.debug('DONE swapping for {}, new children: {}'.format(
             node.__repr__(), node.children))
