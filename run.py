@@ -60,27 +60,32 @@ class RunManager:
             op.Write()
         root_file.Close()
 
-    def __node_to_root(self, node, rdf = None):
+    def __node_to_root(self, node, rdf = None,
+            cuts = None, weights = None):
+        if cuts is None:
+            cuts = list()
+        if weights is None:
+            weights = list()
         logger.debug('%%%%%%%%%% __node_to_root, converting from Graph to ROOT language the following node\n{}'.format(
             node))
         if node.kind == 'dataset':
             result = self.__rdf_from_dataset(
                 node.unit_block)
         elif node.kind == 'selection':
-            result = self.__cuts_and_weights_from_selection(
-                rdf, node.unit_block)
+            (result, cuts, weights) = self.__cuts_and_weights_from_selection(
+                rdf, node.unit_block, cuts, weights)
         elif node.kind == 'action':
             if isinstance(node.unit_block, Count):
                 result = self.__sum_from_count(
                     rdf, node.unit_block)
             elif isinstance(node.unit_block, Histogram):
                 result = self.__histo1d_from_histo(
-                    rdf, node.unit_block)
+                    rdf, node.unit_block, cuts, weights)
         if node.children:
             for child in node.children:
                 logger.debug('%%%%% __node_to_root, do not return; apply actions in "{}" on RDF "{}"'.format(
                     child.__repr__(), result))
-                self.__node_to_root(child, result)
+                self.__node_to_root(child, result, cuts, weights)
         else:
             logger.debug('%%%%% __node_to_root, final return: append \n{} to final pointers'.format(
                 result))
@@ -122,31 +127,19 @@ class RunManager:
         rdf = RDataFrame(chain)
         return rdf
 
-    def __cuts_and_weights_from_selection(self, rdf, selection):
-        if selection.cuts:
-            cut_name = '__cut__' + selection.name
-            cut_expression = ' && '.join([cut.expression for cut in selection.cuts])
-            logger.debug('%%%%% Defining merged cut {} column'.format(
-                cut_expression))
-            rdf = rdf.Define(
-                cut_name,
-                cut_expression)
-        if selection.weights:
-            weight_name = '__weight__' + selection.name
-            weight_expression = '*'.join([
-                weight.expression for weight in selection.weights])
-            rdf = rdf.Define(
-                weight_name,
-                weight_expression)
-            logger.debug('%%%%% Defining {} column with weight expression {}'.format(
-                weight_name,
-                weight_expression))
-        return rdf
+    def __cuts_and_weights_from_selection(self, rdf, selection, cuts = [], weights = []):
+        for cut in selection.cuts:
+            cuts.append(cut)
+        logger.debug('%%%%% Cumulate cuts {}'.format(cuts))
+        for weight in selection.weights:
+            weights.append(weight)
+        logger.debug('%%%%% Cumulate weights {}'.format(weights))
+        return (rdf, cuts, weights)
 
     def __sum_from_count(self, rdf, count):
         return rdf.Sum(count.variable)
 
-    def __histo1d_from_histo(self, rdf, histogram):
+    def __histo1d_from_histo(self, rdf, histogram, cuts = [], weights = []):
         name = histogram.name
         nbins = histogram.binning.nbins
         edges = histogram.binning.edges
@@ -154,17 +147,13 @@ class RunManager:
 
         # Create macro weight string from sub-weights applied
         # (saved earlier as rdf columns)
-        weight_expression = '*'.join([
-            name for name in rdf.GetColumnNames() if name.startswith(
-                '__weight__')])
-        logger.debug('%%%%%%%%%% Histo1D from histo: created weight expression {}'.format(
+        weight_expression = '*'.join([weight.expression for weight in weights])
+        logger.debug('%%%%%%%%%% Histo1D from histogram: created weight expression {}'.format(
             weight_expression))
 
         # Create macro cut string from sub-cuts applied
         # (saved earlier as rdf columns)
-        cut_expression = ' && '.join([
-            name for name in rdf.GetColumnNames() if name.startswith(
-                '__cut__')])
+        cut_expression = ' && '.join([cut.expression for cut in cuts])
         logger.debug('%%%%%%%%%% Histo1D from histogram: created cut expression {}'.format(
             cut_expression))
         if cut_expression:
@@ -188,6 +177,6 @@ class RunManager:
             logger.debug('%%%%%%%%%% Attaching histogram called {}'.format(name))
             histo = rdf.Histo1D((
                 name, name, nbins, l_edges.data()),
-                var, weight_expression)
+                var, weight_name)
 
         return histo
