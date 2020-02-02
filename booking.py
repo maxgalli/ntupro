@@ -253,10 +253,9 @@ class Unit:
 
     def __set_selections(self, selections):
         if isinstance(selections, list):
+            is_selection = True
             for selection in selections:
-                if isinstance(selection, Selection):
-                    is_selection = True
-                else:
+                if not isinstance(selection, Selection):
                     is_selection = False
                     break
             if is_selection:
