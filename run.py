@@ -39,13 +39,6 @@ class RunManager:
         self.parallelize = parallelize
         self.nthreads = nthreads
         for graph in graphs:
-            # This gets the name of the graph being used
-            # (which is also the name of the dataset
-            # related to this graph), to put it in the
-            # histogram name.
-            self._last_used_dataset = graph.name
-            #logger.debug('Last used dataset called {}'.format(
-                #self._last_used_dataset))
             self.__node_to_root(graph)
         logger.debug('%%%%%%%%%% Final pointers (histograms and counts): {}'.format(
             self.final_ptrs))
@@ -82,7 +75,7 @@ class RunManager:
                     rdf, node.unit_block)
             elif isinstance(node.unit_block, Histogram):
                 result = self.__histo1d_from_histo(
-                    rdf, node.unit_block, self._last_used_dataset)
+                    rdf, node.unit_block)
         if node.children:
             for child in node.children:
                 logger.debug('%%%%% __node_to_root, do not return; apply actions in "{}" on RDF "{}"'.format(
@@ -153,7 +146,7 @@ class RunManager:
     def __sum_from_count(self, rdf, count):
         return rdf.Sum(count.variable)
 
-    def __histo1d_from_histo(self, rdf, histogram, dataset_name):
+    def __histo1d_from_histo(self, rdf, histogram):
         name = histogram.name
         nbins = histogram.binning.nbins
         edges = histogram.binning.edges
