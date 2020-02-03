@@ -9,3 +9,5 @@ from ._booking import Count
 from ._booking import Histogram
 
 from ._optimization import Node
+
+from ._run import RDataFrameCutWeight

@@ -1,5 +1,6 @@
 from .utils import Count
 from .utils import Histogram
+from .utils import RDataFrameCutWeight
 
 from ROOT import RDataFrame
 from ROOT import TFile
@@ -60,32 +61,27 @@ class RunManager:
             op.Write()
         root_file.Close()
 
-    def __node_to_root(self, node, rdf = None,
-            cuts = None, weights = None):
-        if cuts is None:
-            cuts = list()
-        if weights is None:
-            weights = list()
+    def __node_to_root(self, node, rcw = None):
         logger.debug('%%%%%%%%%% __node_to_root, converting from Graph to ROOT language the following node\n{}'.format(
             node))
         if node.kind == 'dataset':
             result = self.__rdf_from_dataset(
                 node.unit_block)
         elif node.kind == 'selection':
-            (result, cuts, weights) = self.__cuts_and_weights_from_selection(
-                rdf, node.unit_block, cuts, weights)
+            result = self.__cuts_and_weights_from_selection(
+                rcw, node.unit_block)
         elif node.kind == 'action':
             if isinstance(node.unit_block, Count):
                 result = self.__sum_from_count(
-                    rdf, node.unit_block)
+                    rcw, node.unit_block)
             elif isinstance(node.unit_block, Histogram):
                 result = self.__histo1d_from_histo(
-                    rdf, node.unit_block, cuts, weights)
+                    rcw, node.unit_block)
         if node.children:
             for child in node.children:
                 logger.debug('%%%%% __node_to_root, do not return; apply actions in "{}" on RDF "{}"'.format(
                     child.__repr__(), result))
-                self.__node_to_root(child, result, cuts, weights)
+                self.__node_to_root(child, result)
         else:
             logger.debug('%%%%% __node_to_root, final return: append \n{} to final pointers'.format(
                 result))
@@ -125,21 +121,25 @@ class RunManager:
         # Keep main chain alive
         self.tchains.append(chain)
         rdf = RDataFrame(chain)
-        return rdf
+        rcw = RDataFrameCutWeight(rdf)
+        return rcw
 
-    def __cuts_and_weights_from_selection(self, rdf, selection, cuts = [], weights = []):
+    def __cuts_and_weights_from_selection(self, rcw, selection):
+        l_cuts = [cut for cut in rcw.cuts]
+        l_weights = [weight for weight in rcw.weights]
         for cut in selection.cuts:
-            cuts.append(cut)
-        logger.debug('%%%%% Cumulate cuts {}'.format(cuts))
+            l_cuts.append(cut)
+        logger.debug('%%%%% Cumulate cuts {}'.format(rcw.cuts))
         for weight in selection.weights:
-            weights.append(weight)
-        logger.debug('%%%%% Cumulate weights {}'.format(weights))
-        return (rdf, cuts, weights)
+            l_weights.append(weight)
+        logger.debug('%%%%% Cumulate weights {}'.format(rcw.weights))
+        l_rcw = RDataFrameCutWeight(rcw.frame, l_cuts, l_weights)
+        return l_rcw
 
     def __sum_from_count(self, rdf, count):
         return rdf.Sum(count.variable)
 
-    def __histo1d_from_histo(self, rdf, histogram, cuts = [], weights = []):
+    def __histo1d_from_histo(self, rcw, histogram):
         name = histogram.name
         nbins = histogram.binning.nbins
         edges = histogram.binning.edges
@@ -147,17 +147,17 @@ class RunManager:
 
         # Create macro weight string from sub-weights applied
         # (saved earlier as rdf columns)
-        weight_expression = '*'.join([weight.expression for weight in weights])
+        weight_expression = '*'.join([weight.expression for weight in rcw.weights])
         logger.debug('%%%%%%%%%% Histo1D from histogram: created weight expression {}'.format(
             weight_expression))
 
         # Create macro cut string from sub-cuts applied
         # (saved earlier as rdf columns)
-        cut_expression = ' && '.join([cut.expression for cut in cuts])
+        cut_expression = ' && '.join([cut.expression for cut in rcw.cuts])
         logger.debug('%%%%%%%%%% Histo1D from histogram: created cut expression {}'.format(
             cut_expression))
         if cut_expression:
-            rdf = rdf.Filter(cut_expression)
+            rcw.frame = rcw.frame.Filter(cut_expression)
 
         # Create std::vector with the histogram edges
         l_edges = vector['double']()
@@ -166,16 +166,16 @@ class RunManager:
 
         if not weight_expression:
             logger.debug('%%%%%%%%%% Attaching histogram called {}'.format(name))
-            histo = rdf.Histo1D((
+            histo = rcw.frame.Histo1D((
                     name, name, nbins, l_edges.data()),
                     var)
         else:
             weight_name = 'TotalWeight'
             logger.debug('%%%%%%%%%% Histo1D from histogram: defining {} column with weight expression {}'.format(
                 weight_name, weight_expression))
-            rdf = rdf.Define(weight_name, weight_expression)
+            rcw.frame = rcw.frame.Define(weight_name, weight_expression)
             logger.debug('%%%%%%%%%% Attaching histogram called {}'.format(name))
-            histo = rdf.Histo1D((
+            histo = rcw.frame.Histo1D((
                 name, name, nbins, l_edges.data()),
                 var, weight_name)
 
