@@ -53,10 +53,6 @@ class Node:
         return self.name
 
     def __eq__(self, other):
-        logger.debug('__eq__ compares: names ({} with {}), kinds ({} and {}) and Unit blocks ({} and {})'.format(
-                self.name, other.name,
-                self.kind, other.kind,
-                self.unit_block, other.unit_block))
         return self.name == other.name and \
             self.kind == other.kind and \
             self.unit_block == other.unit_block
