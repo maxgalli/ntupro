@@ -322,12 +322,13 @@ class UnitManager:
         self.booked_units = [arg for arg in args \
                 if isinstance(arg, Unit)]
 
-    def book(self, units, variation = None):
+    def book(self, units, variations = None):
         self.booked_units.extend(units)
-        if variation:
-            logger.debug('Applying variation {}'.format(variation))
-            for unit in units:
-                self.apply_variation(unit, variation)
+        if variations:
+            for variation in variations:
+                logger.debug('Applying variation {}'.format(variation))
+                for unit in units:
+                    self.apply_variation(unit, variation)
 
     def apply_variation(self, unit, variation):
         if isinstance(variation, ChangeDataset):
