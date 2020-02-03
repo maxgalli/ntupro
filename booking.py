@@ -288,7 +288,7 @@ class Unit:
     def __set_new_action(self, action):
         name = '#'.join([action.variable,
             self.dataset.name,
-            *[selection.name for selection in self.selections]])
+            '-'.join([selection.name for selection in self.selections])])
         if isinstance(action, Histogram):
             name = '#'.join([name, action.binning.name])
             return Histogram(
