@@ -170,7 +170,8 @@ class RunManager:
                     name, name, nbins, l_edges.data()),
                     var)
         else:
-            weight_name = 'TotalWeight'
+            weight_name = name.replace('#', '_')
+            weight_name = weight_name.replace('-', '_')
             logger.debug('%%%%%%%%%% Histo1D from histogram: defining {} column with weight expression {}'.format(
                 weight_name, weight_expression))
             rcw.frame = rcw.frame.Define(weight_name, weight_expression)
