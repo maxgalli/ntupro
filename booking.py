@@ -14,6 +14,7 @@ from .variations import RemoveCut
 from .variations import RemoveWeight
 from .variations import AddCut
 from .variations import AddWeight
+from .variations import SquareWeight
 
 from ROOT import TFile
 
@@ -397,5 +398,13 @@ class UnitManager:
             new_selections = [selection for selection in unit.selections]
             new_selections.append(Selection(
                 name = variation.weight.name, weights = [variation.weight]))
+            self.booked_units.append(Unit(
+                unit.dataset, new_selections, unit.actions, variation))
+        elif isinstance(variation, SquareWeight):
+            new_selections = [selection for selection in unit.selections]
+            for new_selection in new_selections:
+                for weight in new_selection.weights:
+                    if weight.name == variation.name:
+                        weight.square()
             self.booked_units.append(Unit(
                 unit.dataset, new_selections, unit.actions, variation))

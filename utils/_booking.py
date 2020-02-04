@@ -122,6 +122,11 @@ class Weight(Operation):
                 + ')'
         return layout
 
+    def square(self):
+        self.name = self.name + '^2'
+        self.expression = '*'.join([
+            self.expression, self.expression])
+
 
 class Selection:
     def __init__(
