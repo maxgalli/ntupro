@@ -153,7 +153,7 @@ class DatasetFromDatabase:
             else:
                 if folder not in root_file.GetListOfKeys():
                     raise NameError(
-                        'Folder not in {}\n'.format(path_to_root_file))
+                        'Folder {} not in {}\n'.format(folder, path_to_root_file))
                 full_tree_name = '/'.join([folder, tree_name])
                 return full_tree_name
 
@@ -333,15 +333,20 @@ class UnitManager:
 
     def apply_variation(self, unit, variation):
         if isinstance(variation, ChangeDataset):
-            new_dataset = dataset_from_database(
-                    variation.folder_name,
-                    unit.dataset._build_info['path_to_database'],
-                    unit.dataset._build_info['queries'],
-                    variation.folder_name,
-                    unit.dataset._build_info['files_base_directories'],
-                    unit.dataset._build_info['friends_base_directories'])
-            self.booked_units.append(Unit(
-                new_dataset, unit.selections, unit.actions, variation))
+            for suff in variation.suffix:
+                new_folder_name = unit.dataset._build_info['folder'].split('_')[0]\
+                    + '_'\
+                    + variation.folder_name\
+                    + suff
+                new_dataset = dataset_from_database(
+                        variation.folder_name,
+                        unit.dataset._build_info['path_to_database'],
+                        unit.dataset._build_info['queries'],
+                        new_folder_name,
+                        unit.dataset._build_info['files_base_directories'],
+                        unit.dataset._build_info['friends_base_directories'])
+                self.booked_units.append(Unit(
+                    new_dataset, unit.selections, unit.actions, variation))
         elif isinstance(variation, ReplaceCut):
             new_selections = list()
             for selection in unit.selections:
