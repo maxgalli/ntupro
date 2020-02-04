@@ -1,8 +1,10 @@
 class ChangeDataset:
     def __init__(self,
-            var_name, folder_name):
+            var_name, folder_name,
+            suffix = []):
         self.name = var_name
         self.folder_name = folder_name
+        self.suffix = suffix
 
     def __str__(self):
         return self.name
