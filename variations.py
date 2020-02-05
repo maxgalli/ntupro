@@ -1,4 +1,5 @@
 from .booking import Unit
+from .booking import dataset_from_database
 from .utils import Selection
 
 import logging
@@ -102,7 +103,7 @@ class RemoveCut(Variation):
     def create(self, unit):
         new_selections = [selection for selection in unit.selections]
         for new_selection in new_selections:
-            selection.remove_cut(self.removed_name)
+            new_selection.remove_cut(self.removed_name)
         return Unit(unit.dataset, new_selections, unit.actions, self)
 
 class RemoveWeight(Variation):
@@ -114,7 +115,7 @@ class RemoveWeight(Variation):
     def create(self, unit):
         new_selections = [selection for selection in unit.selections]
         for new_selection in new_selections:
-            selection.remove_weight(self.removed_name)
+            new_selection.remove_weight(self.removed_name)
         return Unit(unit.dataset, new_selections, unit.actions, self)
 
 
@@ -157,3 +158,15 @@ class SquareWeight(Variation):
                 if weight.name == self.name:
                     weight.square()
         return Unit(unit.dataset, new_selections, unit.actions, self)
+
+
+class SquareAndRemoveWeight(Variation):
+    def __init__(self,
+            name, weight_name):
+        Variation.__init__(self, name)
+        self.weight_name = weight_name
+
+    def create(self, unit):
+        sw = SquareWeight(self.name + 'Up', self.weight_name)
+        rw = RemoveWeight(self.name + 'Down', self.weight_name)
+        return sw.create(unit), rw.create(unit)

@@ -323,4 +323,8 @@ class UnitManager:
                     self.apply_variation(unit, variation)
 
     def apply_variation(self, unit, variation):
-        self.booked_units.append(variation.create(unit))
+        new_unit = variation.create(unit)
+        if isinstance(new_unit, tuple):
+            self.booked_units.extend(new_unit)
+        else:
+            self.booked_units.append(new_unit)
