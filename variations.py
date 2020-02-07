@@ -29,19 +29,22 @@ class ChangeDataset(Variation):
         self.suffix = suffix
 
     def create(self, unit):
+        results = list()
         for suff in self.suffix:
             new_folder_name = unit.dataset._build_info['folder'].split('_')[0]\
                 + '_'\
                 + self.folder_name\
                 + suff
             new_dataset = dataset_from_database(
-                    self.folder_name,
+                    self.folder_name + suff,
                     unit.dataset._build_info['path_to_database'],
                     unit.dataset._build_info['queries'],
                     new_folder_name,
                     unit.dataset._build_info['files_base_directories'],
                     unit.dataset._build_info['friends_base_directories'])
-            return Unit(new_dataset, unit.selections, unit.actions, self)
+            results.append(Unit(
+                new_dataset, unit.selections, unit.actions, self))
+        return tuple(results)
 
 
 class ReplaceCut(Variation):
