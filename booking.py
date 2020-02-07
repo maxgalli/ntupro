@@ -154,8 +154,7 @@ class DatasetFromDatabase:
         # E.g.: file_base_dir/file_name.root
         root_files = get_complete_filenames(
             files_base_directories, names)
-        logger.debug('%%%%%%%%%% Creating dataset {}, get root files:\n\t{}'.format(
-            dataset_name, root_files))
+        logger.debug('%%%%%%%%%% Creating dataset {}'.format(dataset_name))
         ntuples = []
 
         # E.g.: file_base_dir/file_name1.root/folder/ntuple
