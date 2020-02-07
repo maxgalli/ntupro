@@ -36,7 +36,7 @@ class ChangeDataset(Variation):
                 + self.folder_name\
                 + suff
             new_dataset = dataset_from_database(
-                    self.folder_name + suff,
+                    self.folder_name + suff + '_' + unit.dataset.name,
                     unit.dataset._build_info['path_to_database'],
                     unit.dataset._build_info['queries'],
                     new_folder_name,
