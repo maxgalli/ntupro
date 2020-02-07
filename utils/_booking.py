@@ -17,6 +17,13 @@ class NtupleBase:
                 + ')'
         return layout
 
+    def __eq__(self, other):
+        return self.path == other.path and \
+            self.directory == other.directory
+
+    def __hash__(self):
+        return hash((
+            self.path, self.directory))
 
 class Friend(NtupleBase):
 
@@ -79,6 +86,13 @@ class Dataset:
         for key, info in zip(keys, build_info):
             self._build_info[key] = info
 
+    def __eq__(self, other):
+        return self.name == other.name and \
+            self.ntuples == other.ntuples
+
+    def __hash__(self):
+        return hash((
+            self.name, self.ntuples))
 
 class Operation:
     def __init__(
