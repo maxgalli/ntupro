@@ -53,6 +53,7 @@ class RunManager:
         """
         logger.debug('%%%%%%%%%% Chains {} and friend chains {} still alive'.format(
             self.tchains, self.friend_tchains))
+        logger.info('%%%%%%%%%% Start producing {} shapes'.format(len(self.final_ptrs)))
         if update:
             root_file = TFile(of_name, 'UPDATE')
         else:
