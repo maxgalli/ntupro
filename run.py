@@ -60,15 +60,20 @@ class RunManager:
         root_file.Close()
 
     def __node_to_root(self, node, rcw = None):
-        logger.debug('%%%%%%%%%% __node_to_root, converting from Graph to ROOT language the following node\n{}'.format(
-            node))
         if node.kind == 'dataset':
+            logger.debug('%%%%%%%%%% __node_to_root, converting to ROOT language the following dataset node\n{}'.format(
+                node))
             result = self.__rdf_from_dataset(
                 node.unit_block)
         elif node.kind == 'selection':
+            if len(node.children) > 1:
+                logger.debug('%%%%%%%%%% __node_to_root, converting to ROOT language the following crossroad node\n{}'.format(
+                    node))
             result = self.__cuts_and_weights_from_selection(
                 rcw, node.unit_block)
         elif node.kind == 'action':
+            logger.debug('%%%%%%%%%% __node_to_root, converting to ROOT language the following action node\n{}'.format(
+                node))
             if isinstance(node.unit_block, Count):
                 result = self.__sum_from_count(
                     rcw, node.unit_block)
@@ -77,12 +82,8 @@ class RunManager:
                     rcw, node.unit_block)
         if node.children:
             for child in node.children:
-                logger.debug('%%%%% __node_to_root, do not return; apply actions in "{}" on RDF "{}"'.format(
-                    child.__repr__(), result))
                 self.__node_to_root(child, result)
         else:
-            logger.debug('%%%%% __node_to_root, final return: append \n{} to final pointers'.format(
-                result))
             self.final_ptrs.append(result)
 
     def __rdf_from_dataset(self, dataset):
@@ -96,24 +97,15 @@ class RunManager:
         chain = TChain(tree_name, tree_name)
         ftag_fchain = {}
         for ntuple in dataset.ntuples:
-            logger.debug('%%%%% Dataset -> RDF, processing ntuple {}'.format(
-                ntuple))
             chain.Add(ntuple.path)
             for friend in ntuple.friends:
-                logger.debug('%%%%% Dataset -> RDF, processing friend {}'.format(
-                    friend))
                 if friend.tag not in ftag_fchain.keys():
                     ftag_fchain[friend.tag] = TChain(friend.directory, friend.directory)
-                    logger.debug('%%%%% Dataset -> RDF, chain created from friend')
                 ftag_fchain[friend.tag].Add(friend.path)
-        logger.debug('%%%%% Dataset -> RDF, Tags-Chains dictionary: {}'.format(
-            ftag_fchain))
         for ch in ftag_fchain.values():
             chain.AddFriend(ch)
             # Keep friend chains alive
             self.friend_tchains.append(ch)
-        logger.debug('%%%%% Creating RDF from TChain ({}) with friends {}'.format(
-            chain, [f for f in chain.GetListOfFriends()]))
         if self.parallelize:
             EnableImplicitMT(self.nthreads)
         # Keep main chain alive
@@ -127,10 +119,8 @@ class RunManager:
         l_weights = [weight for weight in rcw.weights]
         for cut in selection.cuts:
             l_cuts.append(cut)
-        logger.debug('%%%%% Cumulate cuts {}'.format(rcw.cuts))
         for weight in selection.weights:
             l_weights.append(weight)
-        logger.debug('%%%%% Cumulate weights {}'.format(rcw.weights))
         l_rcw = RDataFrameCutWeight(rcw.frame, l_cuts, l_weights)
         return l_rcw
 
@@ -146,14 +136,10 @@ class RunManager:
         # Create macro weight string from sub-weights applied
         # (saved earlier as rdf columns)
         weight_expression = '*'.join([weight.expression for weight in rcw.weights])
-        logger.debug('%%%%%%%%%% Histo1D from histogram: created weight expression {}'.format(
-            weight_expression))
 
         # Create macro cut string from sub-cuts applied
         # (saved earlier as rdf columns)
         cut_expression = ' && '.join([cut.expression for cut in rcw.cuts])
-        logger.debug('%%%%%%%%%% Histo1D from histogram: created cut expression {}'.format(
-            cut_expression))
         if cut_expression:
             rcw.frame = rcw.frame.Filter(cut_expression)
 
@@ -171,8 +157,6 @@ class RunManager:
         else:
             weight_name = name.replace('#', '_')
             weight_name = weight_name.replace('-', '_')
-            logger.debug('%%%%%%%%%% Histo1D from histogram: defining {} column with weight expression {}'.format(
-                weight_name, weight_expression))
             rcw.frame = rcw.frame.Define(weight_name, weight_expression)
             logger.debug('%%%%%%%%%% Attaching histogram called {}'.format(name))
             histo = rcw.frame.Histo1D((
