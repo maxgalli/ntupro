@@ -154,21 +154,21 @@ class Selection:
         return 'Selection-{}'.format(self.name)
 
     def __eq__(self, other):
-        return self.name == other.name and \
-            self.cuts == other.cuts and \
+        return self.cuts == other.cuts and \
             self.weights == other.weights
 
     def __hash__(self):
-        return hash((
-            self.name, tuple(self.cuts), tuple(self.weights)))
+        return hash((tuple(self.cuts), tuple(self.weights)))
 
     def split(self):
         minimal_selections = list()
         for cut in self.cuts:
-            s = Selection(name = cut.name, cuts = [cut])
+            s = Selection(name = '___'.join([cut.name, self.name]),
+                    cuts = [cut])
             minimal_selections.append(s)
         for weight in self.weights:
-            s = Selection(name = weight.name, weights = [weight])
+            s = Selection(name = '___'.join([weight.name, self.name]),
+                    weights = [weight])
             minimal_selections.append(s)
         return minimal_selections
 
