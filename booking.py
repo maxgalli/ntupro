@@ -186,17 +186,6 @@ class DatasetFromDatabase:
                 files_base_directories,
                 friends_base_directories)
 
-        # Debug
-        def debug_dataset():
-            logger.debug('%%%%%%%%%% Creating dataset {}, analyze ntuples'.format(dataset_name))
-            for n, ntuple in enumerate(ntuples):
-                logger.debug('Ntuple {}:\n\tPath: {}\n\tFolder: {}'.format(
-                    n, ntuple.path, ntuple.directory))
-                for m, friend in enumerate(ntuple.friends):
-                    logger.debug('\n\tFriend {} of ntuple {}:\n\tPath: {}\n\tFolder: {}'.format(
-                        m, n, friend.path, friend.directory))
-        #logger.debug(debug_dataset())
-
         return dataset
 
 dataset_from_database = DatasetFromDatabase()

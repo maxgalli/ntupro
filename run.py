@@ -41,8 +41,6 @@ class RunManager:
         self.nthreads = nthreads
         for graph in graphs:
             self.__node_to_root(graph)
-        logger.debug('%%%%%%%%%% Final pointers (histograms and counts): {}'.format(
-            self.final_ptrs))
 
     def run_locally(self, of_name, update = False):
         """Save to file the histograms booked.
@@ -51,9 +49,8 @@ class RunManager:
             of_name (str): Name of the output .root
                 file
         """
-        logger.debug('%%%%%%%%%% Chains {} and friend chains {} still alive'.format(
-            self.tchains, self.friend_tchains))
         logger.info('%%%%%%%%%% Start producing {} shapes'.format(len(self.final_ptrs)))
+        logger.debug('%%%%%%%%%% Start producing {} shapes'.format(len(self.final_ptrs)))
         if update:
             root_file = TFile(of_name, 'UPDATE')
         else:
@@ -164,6 +161,7 @@ class RunManager:
         l_edges = vector['double']()
         for edge in edges:
             l_edges.push_back(edge)
+
 
         if not weight_expression:
             logger.debug('%%%%%%%%%% Attaching histogram called {}'.format(name))
