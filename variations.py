@@ -22,29 +22,22 @@ class Variation:
 
 class ChangeDataset(Variation):
     def __init__(self,
-            name, folder_name,
-            suffix = []):
+            name, folder_name):
         Variation.__init__(self, name)
         self.folder_name = folder_name
-        self.suffix = suffix
 
     def create(self, unit):
-        results = list()
-        for suff in self.suffix:
-            new_folder_name = unit.dataset._build_info['folder'].split('_')[0]\
-                + '_'\
-                + self.folder_name\
-                + suff
-            new_dataset = dataset_from_database(
-                    self.folder_name + suff + '_' + unit.dataset.name,
-                    unit.dataset._build_info['path_to_database'],
-                    unit.dataset._build_info['queries'],
-                    new_folder_name,
-                    unit.dataset._build_info['files_base_directories'],
-                    unit.dataset._build_info['friends_base_directories'])
-            results.append(Unit(
-                new_dataset, unit.selections, unit.actions, self))
-        return tuple(results)
+        new_folder_name = unit.dataset._build_info['folder'].split('_')[0]\
+            + '_'\
+            + self.folder_name
+        new_dataset = dataset_from_database(
+                self.folder_name + '_' + unit.dataset.name,
+                unit.dataset._build_info['path_to_database'],
+                unit.dataset._build_info['queries'],
+                new_folder_name,
+                unit.dataset._build_info['files_base_directories'],
+                unit.dataset._build_info['friends_base_directories'])
+        return Unit(new_dataset, unit.selections, unit.actions, self)
 
 
 class ReplaceCut(Variation):
