@@ -155,14 +155,3 @@ class SquareWeight(Variation):
                     weight.square()
         return Unit(unit.dataset, new_selections, unit.actions, self)
 
-
-class SquareAndRemoveWeight(Variation):
-    def __init__(self,
-            name, weight_name):
-        Variation.__init__(self, name)
-        self.weight_name = weight_name
-
-    def create(self, unit):
-        sw = SquareWeight(self.name + 'Up', self.weight_name)
-        rw = RemoveWeight(self.name + 'Down', self.weight_name)
-        return sw.create(unit), rw.create(unit)
