@@ -230,6 +230,13 @@ class Binning:
         self.edges = edges
         self.nbins = len(edges) - 1
 
+    def __eq__(self, other):
+        return self.name == other.name and \
+            self.edges == other.edges
+
+    def __hash__(self):
+        return hash((
+            self.name, tuple(self.edges)))
 
 class Action:
     def __init__(self,
@@ -255,3 +262,13 @@ class Histogram(Action):
         else:
             self.binning = Binning(
                 variable, edges)
+    def __eq__(self, other):
+        return self.variable == other.variable and \
+            self.binning == other.binning and \
+            self.name == other.name
+
+    def __hash__(self):
+        return hash((
+            self.variable, self.binning,
+            self.name))
+

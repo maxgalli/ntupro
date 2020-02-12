@@ -282,6 +282,16 @@ class Unit:
         for action in self.actions:
             action.name = '#'.join([action.name, self.variation.name])
 
+    def __eq__(self, other):
+        return self.dataset == other.dataset and \
+            self.selections == other.selections and \
+            self.actions == other.actions
+
+    def __hash__(self):
+        return hash((
+            self.dataset, tuple(self.selections),
+            tuple(self.actions)))
+
 class UnitManager:
     """
     Manager of all the Unit objects that are created.
@@ -303,7 +313,9 @@ class UnitManager:
                 if isinstance(arg, Unit)]
 
     def book(self, units, variations = None):
-        self.booked_units.extend(units)
+        for unit in units:
+            if unit not in self.booked_units:
+                self.booked_units.append(unit)
         if variations:
             for variation in variations:
                 logger.debug('Applying variation {}'.format(variation))
