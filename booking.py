@@ -196,13 +196,23 @@ class Unit:
     of a dataset, a set of selections to apply on the data
     and a set of actions.
 
+    Args:
+        dataset (Dataset): Set of TTree objects to run the
+            analysis on
+        selections (list): List of Selection-type objects
+        actions (Action): Actions to perform on the processed
+            dataset, can be 'Histogram' or 'Count'
+        variation (Variation): Variations applied, meaning
+            that this selection is the result of a variation
+            applied on other selections
+
     Attributes:
         dataset (Dataset): Set of TTree objects to run the
             analysis on
         selections (list): List of Selection-type objects
         actions (Action): Actions to perform on the processed
             dataset, can be 'Histogram' or 'Count'
-        variation (): Variations applied, meaning
+        variation (Variation): Variations applied, meaning
             that this selection is the result of a variation
             applied on other selections
     """

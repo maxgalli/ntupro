@@ -25,11 +25,24 @@ class RunManager:
     Args:
         graphs (list): List of Graph objects that are converted
             node by node to RDataFrame operations
+        parallelize (Bool): Value indicating if the RDataFrame
+            ImplicitMT is activated
+        nthreads (int): number of threads passed to the
+            EnableImplicitMT function
 
     Attributes:
         final_ptrs (list): List of TH1D objects resulting from a
             set of Filter operations performed on RDataFrames; on
             all them we need to perform a Write operation
+        tchains (list): List of TChains created, saved as attribute
+            for the class in order to not let them go out of scope
+        friend_tchains (list): List of friend TChains created,
+            saved as attribute for the class in otder to not let
+            them out of scope
+        parallelize (Bool): Value indicating if the RDataFrame
+            ImplicitMT is activated
+        nthreads (int): number of threads passed to the
+            EnableImplicitMT function
     """
     def __init__(self, graphs,
             parallelize = False,

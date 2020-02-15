@@ -17,12 +17,22 @@ class Graph(Node):
     Args:
         unit (Unit): unit object from which a graph
             in its basic form is generated
+        split_selections (Bool): boolean value
+            indicating if we want to split the selections
+            into minimal units
+
+    Attributes:
+        unit (Unit): unit object from which a graph
+            in its basic form is generated
         paths (dict): dictionary where the keys are
             the names of the final actions performed
             (histograms and counts) and the values
             are lists containing the nodes in the
             path that needs to be followed to reach
             the action
+        split_selections (Bool): boolean value
+            indicating if we want to split the selections
+            into minimal units
     """
     def __init__(self, unit, split_selections = False):
         logger.debug('%%%%%%%%%% Constructing graph from Unit')
@@ -161,6 +171,10 @@ class GraphManager:
             print('Paths: ', graph.paths)
 
     def _swap_children(self, node):
+        '''Order the nodes on the paths giving priority
+        to the ones that appear more often in all the
+        different paths.
+        '''
         priority = node.compute_nodes_priorities()
         if priority:
             # Empty priority means no selections in Unity
