@@ -92,7 +92,7 @@ class Dataset:
 
     def __hash__(self):
         return hash((
-            self.name, self.ntuples))
+            self.name, tuple(self.ntuples)))
 
 class Operation:
     def __init__(
