@@ -27,18 +27,13 @@ class RunManager:
     Args:
         graphs (list): List of Graph objects that are converted
             node by node to RDataFrame operations
-        multiprocess (bool): Value indicating if the histogram
-            production is run with the help of the multiprocessing
-            Python package
         workers (int): number of slaves passed to the
             multiprocessing.Pool() function
-        parallelize (bool): Value indicating if the RDataFrame
-            ImplicitMT is activated
         nthreads (int): number of threads passed to the
             EnableImplicitMT function
 
     Attributes:
-        final_ptrs (list): List of TH1D objects resulting from a
+        final_results (list): List of TH1D objects resulting from a
             set of Filter operations performed on RDataFrames; on
             all them we need to perform a Write operation
         tchains (list): List of TChains created, saved as attribute
@@ -46,47 +41,29 @@ class RunManager:
         friend_tchains (list): List of friend TChains created,
             saved as attribute for the class in otder to not let
             them out of scope
-        multiprocess (bool): Value indicating if the histogram
-            production is run with the help of the multiprocessing
-            Python package
         workers (int): number of slaves passed to the
             multiprocessing.Pool() function
-        parallelize (Bool): Value indicating if the RDataFrame
-            ImplicitMT is activated
         nthreads (int): number of threads passed to the
             EnableImplicitMT function
     """
     def __init__(self, graphs,
-            multiprocess = False,
             workers = None,
-            parallelize = False,
             nthreads = 0):
-        self.final_ptrs = list()
+        self.final_results = list()
         self.tchains = list()
         self.friend_tchains = list()
-        self.multiprocess = multiprocess
-        self.parallelize = parallelize
         self.nthreads = nthreads
-        if self.multiprocess:
-            if workers is None or workers > len(graphs):
-                workers = len(graphs)
-            logger.info('%%%%%%%%%% Distributing computation over {} processes'.format(workers))
-            for w in range(0, workers):
-                self.final_ptrs.append([])
-                for index in range(w, len(graphs), workers):
-                    self.final_ptrs[w].append(graphs[index])
-            pool = Pool(workers)
-            self.final_ptrs = list(pool.map(self.run_multiprocess, self.final_ptrs))
-            self.final_ptrs = [j for i in self.final_ptrs for j in i]
-        else:
-            logger.debug('%%%%%%%%%% Running Graph-RDF conversion with multiprocessing disabled')
-            for graph in graphs:
-                self.final_ptrs += self.node_to_root(graph)
+        if not isinstance(workers, int):
+            raise TypeError('TypeError: wrong type for workers')
+        if workers is None:
+            workers = 1
+        logger.info('%%%%%%%%%% Distributing computation over {} processes'.format(workers))
+        pool = Pool(workers)
+        self.final_results = list(pool.map(self._run_multiprocess, graphs))
+        self.final_results = [j for i in self.final_results for j in i]
 
-    def run_multiprocess(self, graph_subset):
-        ptrs = list()
-        for graph in graph_subset:
-            ptrs += self.node_to_root(graph)
+    def _run_multiprocess(self, graph):
+        ptrs = self.node_to_root(graph)
         logger.debug('%%%%%%%%%% Ready to produce a subset of {} shapes'.format(
             len(ptrs)))
         results = list()
@@ -102,23 +79,19 @@ class RunManager:
             of_name (str): Name of the output .root
                 file
         """
-        if self.multiprocess:
-            logger.info('%%%%%%%%%% Writing {} shapes to {}'.format(
-                len(self.final_ptrs), of_name))
-        else:
-            logger.info('%%%%%%%%%% Start producing {} shapes'.format(
-                len(self.final_ptrs)))
+        logger.info('%%%%%%%%%% Writing {} shapes to {}'.format(
+            len(self.final_results), of_name))
         if update:
             root_file = TFile(of_name, 'UPDATE')
         else:
             root_file = TFile(of_name, 'RECREATE')
-        for op in self.final_ptrs:
+        for op in self.final_results:
             op.Write()
         root_file.Close()
 
-    def node_to_root(self, node, final_ptrs = None, rcw = None):
-        if final_ptrs is None:
-            final_ptrs = list()
+    def node_to_root(self, node, final_results = None, rcw = None):
+        if final_results is None:
+            final_results = list()
         if node.kind == 'dataset':
             logger.debug('%%%%%%%%%% node_to_root, converting to ROOT language the following dataset node\n{}'.format(
                 node))
@@ -141,10 +114,10 @@ class RunManager:
                     rcw, node.unit_block)
         if node.children:
             for child in node.children:
-                self.node_to_root(child, final_ptrs, result)
+                self.node_to_root(child, final_results, result)
         else:
-            final_ptrs.append(result)
-        return final_ptrs
+            final_results.append(result)
+        return final_results
 
     def __rdf_from_dataset(self, dataset):
         t_names = [ntuple.directory for ntuple in \
@@ -166,7 +139,7 @@ class RunManager:
             chain.AddFriend(ch)
             # Keep friend chains alive
             self.friend_tchains.append(ch)
-        if self.parallelize:
+        if self.nthreads != 0:
             EnableImplicitMT(self.nthreads)
         # Keep main chain alive
         self.tchains.append(chain)
