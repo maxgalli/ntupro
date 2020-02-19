@@ -70,6 +70,7 @@ class RunManager:
         if self.multiprocess:
             if workers is None or workers > len(graphs):
                 workers = len(graphs)
+            logger.info('%%%%%%%%%% Distributing computation over {} processes'.format(workers))
             for w in range(0, workers):
                 self.final_ptrs.append([])
                 for index in range(w, len(graphs), workers):

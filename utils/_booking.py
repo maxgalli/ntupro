@@ -163,11 +163,11 @@ class Selection:
     def split(self):
         minimal_selections = list()
         for cut in self.cuts:
-            s = Selection(name = '___'.join([cut.name, self.name]),
+            s = Selection(name = '-'.join([cut.name, self.name]),
                     cuts = [cut])
             minimal_selections.append(s)
         for weight in self.weights:
-            s = Selection(name = '___'.join([weight.name, self.name]),
+            s = Selection(name = '-'.join([weight.name, self.name]),
                     weights = [weight])
             minimal_selections.append(s)
         return minimal_selections
