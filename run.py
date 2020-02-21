@@ -53,7 +53,7 @@ class RunManager:
         self.tchains = list()
         self.friend_tchains = list()
         self.nthreads = nthreads
-        if not isinstance(workers, int):
+        if not isinstance(workers, int) and workers is not None:
             raise TypeError('TypeError: wrong type for workers')
         if workers is None:
             workers = 1
