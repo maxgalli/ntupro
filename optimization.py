@@ -154,7 +154,6 @@ class GraphManager:
                             merged_graph.children.append(child)
         self.graphs = merged_graphs
         logger.debug('%%%%%%%%%% Merging datasets: DONE')
-        self.print_merged_graphs()
 
     def optimize_selections(self):
         logger.debug('%%%%%%%%%% Optimizing selections:')
@@ -162,7 +161,6 @@ class GraphManager:
             self._swap_children(merged_graph)
             self._merge_children(merged_graph)
         logger.debug('%%%%%%%%%% Optimizing selections: DONE')
-        self.print_merged_graphs()
 
     def print_merged_graphs(self):
         print('Merged graphs:')
