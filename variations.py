@@ -1,5 +1,5 @@
 from .booking import Unit
-from .booking import dataset_from_database
+from .booking import dataset_from_nameset
 from .utils import Selection
 
 import logging
@@ -41,10 +41,9 @@ class ChangeDataset(Variation):
         new_folder_name = unit.dataset._build_info['folder'].split('_')[0]\
             + '_'\
             + self.folder_name
-        new_dataset = dataset_from_database(
+        new_dataset = dataset_from_nameset(
                 self.folder_name + '_' + unit.dataset.name,
-                unit.dataset._build_info['path_to_database'],
-                unit.dataset._build_info['queries'],
+                unit.dataset._build_info['file_names'],
                 new_folder_name,
                 unit.dataset._build_info['files_base_directories'],
                 unit.dataset._build_info['friends_base_directories'])

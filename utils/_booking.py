@@ -81,8 +81,11 @@ class Dataset:
 
     def __set_build_info(self, *build_info):
         self._build_info = dict()
-        keys = ['path_to_database', 'queries', 'folder',
-                'files_base_directories', 'friends_base_directories']
+        keys = [
+            'file_names', 'folder',
+            'files_base_directories',
+            'friends_base_directories'
+            ]
         for key, info in zip(keys, build_info):
             self._build_info[key] = info
 
