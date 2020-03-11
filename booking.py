@@ -183,8 +183,7 @@ class Unit:
         layout = '\n'.join([
             'Dataset: {}'.format(self.dataset.name),
             'Selections: {}'.format(self.selections),
-            'Actions: {}'.format(self.actions),
-            'Variations: {}'.format(self.variation)])
+            'Actions: {}'.format(self.actions)])
         return layout
 
     def __set_dataset(self, dataset):
