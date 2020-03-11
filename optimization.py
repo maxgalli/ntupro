@@ -1,3 +1,4 @@
+from copy import deepcopy
 from collections import Counter
 
 from .booking import Unit
@@ -51,7 +52,7 @@ class Graph(Node):
                 elif isinstance(no_first, list):
                     for action in no_first:
                         no_last.children.append(action)
-                        self.paths[action] = nodes[:-1]
+                        self.paths[action] = deepcopy(nodes[:-1])
             logger.debug('%%%%%%%%%% Path for Unit: {}'.format(self.paths))
             self.children.append(nodes[0])
         else:
