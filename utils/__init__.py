@@ -11,3 +11,6 @@ from ._booking import Histogram
 from ._optimization import Node
 
 from ._run import RDataFrameCutWeight
+
+from ._printing import Node as PrintedNode
+from ._printing import drawTree2

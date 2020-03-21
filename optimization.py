@@ -3,6 +3,8 @@ from collections import Counter
 
 from .booking import Unit
 from .utils import Node
+from .utils import PrintedNode
+from .utils import drawTree2
 
 import logging
 logger = logging.getLogger(__name__)
@@ -164,10 +166,12 @@ class GraphManager:
         logger.debug('%%%%%%%%%% Optimizing selections: DONE')
 
     def print_merged_graphs(self):
+        def call_node_rec(nd):
+            return PrintedNode(nd.__repr__())([call_node_rec(child) for child in nd.children])
+        fancy_trees = [call_node_rec(graph) for graph in self.graphs]
         print('Merged graphs:')
-        for graph in self.graphs:
-            print(graph)
-            print('Paths: ', graph.paths)
+        print('\n\n'.join([
+            drawTree2(False)(False)(t) for t in fancy_trees]))
 
     def _swap_children(self, node):
         '''Order the nodes on the paths giving priority
