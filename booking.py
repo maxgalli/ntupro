@@ -50,10 +50,8 @@ class DatasetFromNameSet:
             file_names, folder,
             files_base_directories,
             friends_base_directories):
-        """Create a Dataset object from a database
-        in JSON format. In this specific case (KAPPA
-        database), a dataset will have the following
-        format (all folder names are equal):
+        """Create a Dataset object from a list containing the names
+        of the ROOT files (e.g. [root_file1, root_file2, (...)]):
             ntuple1: /file_base_dir/root_file1/folder/ntuple
                 friend1: /friend1_base_dir/root_file1/folder/ntuple
                 friend2: /friend2_base_dir/root_file1/folder/ntuple

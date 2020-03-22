@@ -25,6 +25,7 @@ class NtupleBase:
         return hash((
             self.path, self.directory))
 
+
 class Friend(NtupleBase):
 
     def __init__(self,
@@ -96,6 +97,7 @@ class Dataset:
     def __hash__(self):
         return hash((
             self.name, tuple(self.ntuples)))
+
 
 class Operation:
     def __init__(
@@ -274,4 +276,3 @@ class Histogram(Action):
         return hash((
             self.variable, self.binning,
             self.name))
-
