@@ -3,6 +3,7 @@ from .utils import Selection
 from .utils import Friend
 from .utils import Ntuple
 from .utils import Cut
+from .utils import Weight
 from .utils import Action
 from .utils import Count
 from .utils import Histogram

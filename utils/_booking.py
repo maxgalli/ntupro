@@ -76,6 +76,9 @@ class Dataset:
     def __str__(self):
         return 'Dataset-{}'.format(self.name)
 
+    def __repr__(self):
+        return 'Dataset-{}'.format(self.name)
+
     def add_to_ntuples(self, *new_ntuples):
         for new_ntuple in new_ntuples:
             self.ntuples.append(new_ntuple)
