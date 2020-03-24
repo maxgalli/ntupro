@@ -4,6 +4,8 @@ from .utils import Count
 from .utils import Histogram
 from .utils import RDataFrameCutWeight
 
+from ROOT import gROOT
+gROOT.SetBatch(True)
 from ROOT import RDataFrame
 from ROOT import TFile
 from ROOT import TChain
