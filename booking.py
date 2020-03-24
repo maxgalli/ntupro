@@ -188,45 +188,31 @@ class Unit:
         return layout
 
     def __set_dataset(self, dataset):
-        if isinstance(dataset, Dataset):
-            self.dataset = dataset
-        else:
+        if not isinstance(dataset, Dataset):
             raise TypeError(
                 'TypeError: not a Dataset object.')
+        self.dataset = dataset
 
     def __set_selections(self, selections):
-        if isinstance(selections, list):
-            is_selection = True
-            for selection in selections:
-                if not isinstance(selection, Selection):
-                    is_selection = False
-                    break
-            if is_selection:
-                self.selections = selections
-            else:
-                raise TypeError(
-                   'TypeError: not Selection objects.')
-        else:
+        if not isinstance(selections, list):
             raise TypeError(
                 'TypeError: not a list object.')
+        for selection in selections:
+            if not isinstance(selection, Selection):
+                raise TypeError(
+                   'TypeError: not a Selection object.')
+        self.selections = selections
 
     def __set_actions(self, actions):
-        if isinstance(actions, list):
-            for action in actions:
-                if isinstance(action, Action):
-                    is_action = True
-                else:
-                    is_action = False
-                    break
-            if is_action:
-                self.actions = [self.__set_new_action(action) \
-                        for action in actions]
-            else:
-                raise TypeError(
-                   'TypeError: not Action objects.')
-        else:
+        if not isinstance(actions, list):
             raise TypeError(
                     'TypeError: not a list object.')
+        for action in actions:
+            if not isinstance(action, Action):
+                raise TypeError(
+                   'TypeError: not an Action object.')
+        self.actions = [self.__set_new_action(action) \
+                for action in actions]
 
     def __set_new_action(self, action):
         name = '#'.join([action.variable,
@@ -241,6 +227,9 @@ class Unit:
             return Count(action.variable, name)
 
     def __set_variation(self, variation):
+        if not isinstance(variation, Variation):
+            raise TypeError(
+               'TypeError: not a Variation object.')
         self.variation = variation
         for action in self.actions:
             action.name = '#'.join([action.name, self.variation.name])
