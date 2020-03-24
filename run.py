@@ -63,7 +63,8 @@ class RunManager:
             raise TypeError('TypeError: wrong type for workers')
         if workers < 1:
             raise ValueError('ValueError: workers has to be larger zero')
-        logger.info('%%%%%%%%%% Distributing computation over {} processes'.format(workers))
+        logger.info('Computing {} graphs using {} workers with {} threads each'.format(
+            len(graphs), workers, nthreads))
         pool = Pool(workers)
         self.final_results = list(pool.map(self._run_multiprocess, graphs))
         self.final_results = [j for i in self.final_results for j in i]
