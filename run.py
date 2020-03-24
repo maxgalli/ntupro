@@ -29,45 +29,19 @@ class RunManager:
     Args:
         graphs (list): List of Graph objects that are converted
             node by node to RDataFrame operations
-        workers (int): number of slaves passed to the
-            multiprocessing.Pool() function
-        nthreads (int): number of threads passed to the
-            EnableImplicitMT function
 
     Attributes:
-        final_results (list): List of TH1D objects resulting from a
-            set of Filter operations performed on RDataFrames; on
-            all them we need to perform a Write operation
+        graphs (list): List of graphs to be processed
         tchains (list): List of TChains created, saved as attribute
             for the class in order to not let them go out of scope
         friend_tchains (list): List of friend TChains created,
             saved as attribute for the class in otder to not let
             them out of scope
-        workers (int): number of slaves passed to the
-            multiprocessing.Pool() function
-        nthreads (int): number of threads passed to the
-            EnableImplicitMT function
     """
-    def __init__(self, graphs,
-            workers = 1,
-            nthreads = 1):
-        self.final_results = list()
+    def __init__(self, graphs):
+        self.graphs = graphs
         self.tchains = list()
         self.friend_tchains = list()
-        if not isinstance(nthreads, int):
-            raise TypeError('TypeError: wrong type for nthreads')
-        if nthreads < 1:
-            raise ValueError('ValueError: nthreads has to be larger zero')
-        self.nthreads = nthreads
-        if not isinstance(workers, int):
-            raise TypeError('TypeError: wrong type for workers')
-        if workers < 1:
-            raise ValueError('ValueError: workers has to be larger zero')
-        logger.info('Computing {} graphs using {} workers with {} threads each'.format(
-            len(graphs), workers, nthreads))
-        pool = Pool(workers)
-        self.final_results = list(pool.map(self._run_multiprocess, graphs))
-        self.final_results = [j for i in self.final_results for j in i]
 
     def _run_multiprocess(self, graph):
         ptrs = self.node_to_root(graph)
@@ -79,20 +53,34 @@ class RunManager:
             results.append(th)
         return results
 
-    def run_locally(self, of_name, update = False):
+    def run_locally(self, output, nworkers, nthreads):
         """Save to file the histograms booked.
 
         Args:
-            of_name (str): Name of the output .root
-                file
+            output (str): Name of the output .root file
+            nworkers (int): number of slaves passed to the
+                multiprocessing.Pool() function
+            nthreads (int): number of threads passed to the
+                EnableImplicitMT function
         """
+        if not isinstance(nthreads, int):
+            raise TypeError('TypeError: wrong type for nthreads')
+        if nthreads < 1:
+            raise ValueError('ValueError: nthreads has to be larger zero')
+        self.nthreads = nthreads
+        if not isinstance(nworkers, int):
+            raise TypeError('TypeError: wrong type for nworkers')
+        if nworkers < 1:
+            raise ValueError('ValueError: nworkers has to be larger zero')
+        logger.info('Computing {} graphs locally using {} workers with {} threads each'.format(
+            len(self.graphs), nworkers, nthreads))
+        pool = Pool(nworkers)
+        final_results = list(pool.map(self._run_multiprocess, self.graphs))
+        final_results = [j for i in final_results for j in i]
         logger.info('Writing {} results to file {}'.format(
-            len(self.final_results), of_name))
-        if update:
-            root_file = TFile(of_name, 'UPDATE')
-        else:
-            root_file = TFile(of_name, 'RECREATE')
-        for op in self.final_results:
+            len(final_results), output))
+        root_file = TFile(output, 'RECREATE')
+        for op in final_results:
             op.Write()
         root_file.Close()
 
