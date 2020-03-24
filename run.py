@@ -86,7 +86,7 @@ class RunManager:
             of_name (str): Name of the output .root
                 file
         """
-        logger.info('%%%%%%%%%% Writing {} shapes to {}'.format(
+        logger.info('Writing {} results to file {}'.format(
             len(self.final_results), of_name))
         if update:
             root_file = TFile(of_name, 'UPDATE')
