@@ -14,9 +14,7 @@ class RDataFrameCutWeight:
             self.cuts, self.weights))
 
     def __repr__(self):
-        return str((
-            self.frame,
-            self.cuts, self.weights))
+        return self.__str__()
 
     def __eq__(self, other):
         return self.frame == other.frame and \
