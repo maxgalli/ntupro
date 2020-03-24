@@ -1,4 +1,5 @@
 from multiprocessing import Pool
+from time import time
 
 from .utils import Count
 from .utils import Histogram
@@ -72,12 +73,15 @@ class RunManager:
             raise TypeError('TypeError: wrong type for nworkers')
         if nworkers < 1:
             raise ValueError('ValueError: nworkers has to be larger zero')
-        logger.info('Computing {} graphs locally using {} workers with {} threads each'.format(
+        logger.info('Start computing locally results of {} graphs using {} workers with {} threads each'.format(
             len(self.graphs), nworkers, nthreads))
+        start = time()
         pool = Pool(nworkers)
         final_results = list(pool.map(self._run_multiprocess, self.graphs))
         final_results = [j for i in final_results for j in i]
-        logger.info('Writing {} results from {} graphs to file {}'.format(
+        end = time()
+        logger.info('Finished computations in {} seconds'.format(int(end - start)))
+        logger.info('Write {} results from {} graphs to file {}'.format(
             len(final_results), len(self.graphs), output))
         root_file = TFile(output, 'RECREATE')
         for op in final_results:
