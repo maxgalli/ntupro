@@ -77,8 +77,8 @@ class RunManager:
         pool = Pool(nworkers)
         final_results = list(pool.map(self._run_multiprocess, self.graphs))
         final_results = [j for i in final_results for j in i]
-        logger.info('Writing {} results to file {}'.format(
-            len(final_results), output))
+        logger.info('Writing {} results from {} graphs to file {}'.format(
+            len(final_results), len(self.graphs), output))
         root_file = TFile(output, 'RECREATE')
         for op in final_results:
             op.Write()
