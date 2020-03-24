@@ -175,11 +175,11 @@ class RunManager:
 
         # Create macro weight string from sub-weights applied
         # (saved earlier as rdf columns)
-        weight_expression = '*'.join([weight.expression for weight in rcw.weights])
+        weight_expression = '*'.join(['(' + weight.expression + ')' for weight in rcw.weights])
 
         # Create macro cut string from sub-cuts applied
         # (saved earlier as rdf columns)
-        cut_expression = ' && '.join([cut.expression for cut in rcw.cuts])
+        cut_expression = ' && '.join(['(' + cut.expression + ')' for cut in rcw.cuts])
         if cut_expression:
             rcw.frame = rcw.frame.Filter(cut_expression)
 
