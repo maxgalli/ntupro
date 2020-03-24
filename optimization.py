@@ -130,16 +130,16 @@ class GraphManager:
 
     def optimize(self, level = 2):
         if int(level) == 0:
-            print('No optimization selected.')
+            logger.debug('No optimization selected.')
         elif int(level) == 1:
-            print('Level 1 optimization selected: merge datasets.')
+            logger.debug('Level 1 optimization selected: merge datasets.')
             self.merge_datasets()
         elif int(level) >= 2:
-            print('Level 2 optimization selected: merge datasets and selections.')
+            logger.debug('Level 2 optimization selected: merge datasets and selections.')
             self.merge_datasets()
             self.optimize_selections()
         else:
-            print('Invalid level of optimization, default to FULL OPTIMIZED.')
+            logger.debug('Invalid level of optimization, default to FULL OPTIMIZED.')
             self.merge_datasets()
             self.optimize_selections()
 
@@ -169,8 +169,8 @@ class GraphManager:
         def call_node_rec(nd):
             return PrintedNode(nd.__repr__())([call_node_rec(child) for child in nd.children])
         fancy_trees = [call_node_rec(graph) for graph in self.graphs]
-        print('Merged graphs:')
-        print('\n\n'.join([
+        logger.debug('Merged graphs:')
+        logger.debug('\n\n'.join([
             drawTree2(False)(False)(t) for t in fancy_trees]))
 
     def _swap_children(self, node):
