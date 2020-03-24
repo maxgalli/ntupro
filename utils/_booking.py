@@ -119,35 +119,26 @@ class Operation:
 
 class Cut(Operation):
     def __str__(self):
-        layout = 'C(' + self.name \
+        return 'Cut(' + self.name \
                 + ', ' + self.expression \
                 + ')'
-        return layout
 
     def __repr__(self):
-        layout = 'C(' + self.name \
-                + ', ' + self.expression \
-                + ')'
-        return layout
+        return self.__str__()
 
 
 class Weight(Operation):
     def __str__(self):
-        layout = 'W(' + self.name \
+        return 'Weight(' + self.name \
                 + ', ' + self.expression \
                 + ')'
-        return layout
 
     def __repr__(self):
-        layout = 'W(' + self.name \
-                + ', ' + self.expression \
-                + ')'
-        return layout
+        return self.__str__()
 
     def square(self):
         self.name = self.name + '^2'
-        self.expression = '*'.join([
-            self.expression, self.expression])
+        self.expression = '({0:})*({0:})'.format(self.expression)
 
 
 class Selection:
