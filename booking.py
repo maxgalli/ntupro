@@ -262,18 +262,12 @@ class UnitManager:
     objects as arguments or with no arguments, with the above mentioned
     objects added in a second time with the function 'book'.
 
-    Args:
-        *args (Unit): Objects with the structure [dataset,
-            selections, actions]
-
     Attributes:
         booked_units (list): List of the booked units, updated during
             initialization or with the function 'book'
     """
 
-    def __init__(self, *args):
-        self.booked_units = [arg for arg in args \
-                if isinstance(arg, Unit)]
+    booked_units = []
 
     def book(self, units, variations = None):
         for unit in units:
