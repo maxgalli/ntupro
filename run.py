@@ -49,16 +49,20 @@ class RunManager:
             EnableImplicitMT function
     """
     def __init__(self, graphs,
-            workers = None,
-            nthreads = 0):
+            workers = 1,
+            nthreads = 1):
         self.final_results = list()
         self.tchains = list()
         self.friend_tchains = list()
+        if not isinstance(nthreads, int):
+            raise TypeError('TypeError: wrong type for nthreads')
+        if nthreads < 1:
+            raise ValueError('ValueError: nthreads has to be larger zero')
         self.nthreads = nthreads
-        if not isinstance(workers, int) and workers is not None:
+        if not isinstance(workers, int):
             raise TypeError('TypeError: wrong type for workers')
-        if workers is None:
-            workers = 1
+        if workers < 1:
+            raise ValueError('ValueError: workers has to be larger zero')
         logger.info('%%%%%%%%%% Distributing computation over {} processes'.format(workers))
         pool = Pool(workers)
         self.final_results = list(pool.map(self._run_multiprocess, graphs))
@@ -141,7 +145,7 @@ class RunManager:
             chain.AddFriend(ch)
             # Keep friend chains alive
             self.friend_tchains.append(ch)
-        if self.nthreads != 0:
+        if self.nthreads != 1:
             EnableImplicitMT(self.nthreads)
         # Keep main chain alive
         self.tchains.append(chain)
