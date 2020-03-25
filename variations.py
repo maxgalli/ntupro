@@ -1,5 +1,5 @@
 from .booking import Unit
-from .booking import dataset_from_nameset
+from .booking import dataset_from_artusoutput
 from .utils import Selection
 from .utils import Variation
 
@@ -18,7 +18,7 @@ class ChangeDataset(Variation):
         new_folder_name = unit.dataset._build_info['folder'].split('_')[0]\
             + '_'\
             + self.folder_name
-        new_dataset = dataset_from_nameset(
+        new_dataset = dataset_from_artusoutput(
                 self.folder_name + '_' + unit.dataset.name,
                 unit.dataset._build_info['file_names'],
                 new_folder_name,

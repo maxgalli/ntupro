@@ -21,129 +21,70 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class DatasetFromNameSet:
-    """Fake class introduced to simulate a static behavior for
-    the dataset, in order for it to be created only once.
-    The function can be called with the name 'dataset_from_nameset'
-    from the API.
 
-    Attributes:
-        dataset (Dataset): Dataset object created with the function
-        inner_dataset_from_nameset
+def dataset_from_artusoutput(
+        dataset_name,
+        file_names,
+        folder,
+        files_base_directory,
+        friends_base_directories):
+    """Create a Dataset object from a list containing the names
+    of the ROOT files (e.g. [root_file1, root_file2, (...)]):
+        ntuple1: /file_base_dir/root_file1/folder/ntuple
+            friend1: /friend1_base_dir/root_file1/folder/ntuple
+            friend2: /friend2_base_dir/root_file1/folder/ntuple
+        ntuple2: /file_base_dir/root_file2/folder/ntuple
+            friend1: /friend1_base_dir/root_file2/folder/ntuple
+            friend2: /friend2_base_dir/root_file2/folder/ntuple
+        ntuple3: /file_base_dir/root_file3/folder/ntuple
+            friend1: /friend1_base_dir/root_file3/folder/ntuple
+            friend2: /friend2_base_dir/root_file3/folder/ntuple
+        (...)
+
+    Args:
+        dataset_name (str): Name of the dataset
+        file_names (list): List containing the names of the .root
+            files
+        folder (str): Name of the TDirectoryFile in each .root file
+        files_base_directory (str): Path to the files base directory (directories)
+        friends_base_directories (str, list): List of paths to
+            the friends base directory (directories)
+
+    Returns:
+        dataset (Dataset): Dataset object containing TTrees
     """
-    def __init__(self):
-        self._cache = {}
+    def get_full_tree_name(folder, path_to_root_file, tree_name):
+        root_file = TFile(path_to_root_file)
+        if root_file.IsZombie():
+            logger.fatal('File {} does not exist, abort'.format(path_to_root_file))
+            raise FileNotFoundError
+        if folder not in root_file.GetListOfKeys():
+            logger.fatal('Folder {} does not exist in {}\n'.format(folder, path_to_root_file))
+            raise NameError
+        root_file.Close()
+        full_tree_name = '/'.join([folder, tree_name])
+        return full_tree_name
 
-    def __call__(
-            self,
-            dataset_name,
-            file_names, folder,
-            files_base_directories,
-            friends_base_directories):
-        if dataset_name not in self._cache:
-            self._cache[dataset_name] = self.inner_dataset_from_nameset(
-                    dataset_name,
-                    file_names, folder,
-                    files_base_directories,
-                    friends_base_directories)
-        return self._cache[dataset_name]
+    # E.g.: file_base_dir/file_name/file_name.root
+    root_files = [os.path.join(files_base_directory, f, "{}.root".format(f)) for f in file_names]
 
-    def inner_dataset_from_nameset(
-            self,
-            dataset_name,
-            file_names, folder,
-            files_base_directories,
-            friends_base_directories):
-        """Create a Dataset object from a list containing the names
-        of the ROOT files (e.g. [root_file1, root_file2, (...)]):
-            ntuple1: /file_base_dir/root_file1/folder/ntuple
-                friend1: /friend1_base_dir/root_file1/folder/ntuple
-                friend2: /friend2_base_dir/root_file1/folder/ntuple
-            ntuple2: /file_base_dir/root_file2/folder/ntuple
-                friend1: /friend1_base_dir/root_file2/folder/ntuple
-                friend2: /friend2_base_dir/root_file2/folder/ntuple
-            ntuple3: /file_base_dir/root_file3/folder/ntuple
-                friend1: /friend1_base_dir/root_file3/folder/ntuple
-                friend2: /friend2_base_dir/root_file3/folder/ntuple
-            (...)
+    # E.g.: file_base_dir/file_name1/file_name1.root/folder/ntuple
+    #       file_base_dir/file_name1/file_name2.root/folder/ntuple
+    ntuples = []
+    for root_file, file_name in zip(root_files, file_names):
+        tdf_tree = get_full_tree_name(folder, root_file, 'ntuple')
+        friends = []
+        for friends_base_directory in friends_base_directories:
+            friend_path = os.path.join(friends_base_directory, file_name, "{}.root".format(file_name))
+            tdf_tree_friend = get_full_tree_name(folder, friend_path, 'ntuple')
+            if tdf_tree != tdf_tree_friend:
+                logger.fatal("Extracted wrong TDirectoryFile from friend which is not the same than the base file.")
+                raise Exception
+            friends.append(Friend(friend_path, tdf_tree_friend))
+        ntuples.append(Ntuple(root_file, tdf_tree, friends))
 
-        Args:
-            dataset_name (str): Name of the dataset
-            file_names (list): List containing the names of the .root
-                files
-            folder (str): Name of the TDirectoryFile
-            files_base_directories (str, list): Path (list of paths) to
-                the files base directory (directories)
-            friends_base_directories (str, list): Path (list of paths) to
-                the friends base directory (directories)
+    return Dataset(dataset_name, ntuples, file_names, folder, files_base_directory, friends_base_directories)
 
-        Returns:
-            dataset (Dataset): Dataset object containing TTrees
-        """
-        def get_complete_filenames(directory, files):
-            full_paths = []
-            for f in files:
-                full_paths.append(
-                    os.path.join(
-                        directory, f, "{}.root".format(f)
-                        )
-                    )
-            return full_paths
-
-        def get_full_tree_name(
-                folder, path_to_root_file, tree_name):
-            root_file = TFile(path_to_root_file)
-            if root_file.IsZombie():
-                logger.fatal(
-                    'File {} does not exist, abort'.format(
-                        path_to_root_file))
-                raise FileNotFoundError(
-                    'File {} does not exist, abort'.format(
-                        path_to_root_file))
-            else:
-                if folder not in root_file.GetListOfKeys():
-                    raise NameError(
-                        'Folder {} not in {}\n'.format(folder, path_to_root_file))
-                full_tree_name = '/'.join([folder, tree_name])
-                return full_tree_name
-
-        # E.g.: file_base_dir/file_name.root
-        root_files = get_complete_filenames(
-            files_base_directories, file_names)
-        logger.debug('%%%%%%%%%% Creating dataset {}'.format(dataset_name))
-        ntuples = []
-
-        # E.g.: file_base_dir/file_name1.root/folder/ntuple
-        #       file_base_dir/file_name2.root/folder/ntuple
-        for (root_file, name) in zip(root_files, file_names):
-            tdf_tree = get_full_tree_name(
-                folder, root_file, 'ntuple')
-            if tdf_tree:
-                friends = []
-                friend_paths = []
-                for friends_base_directory in friends_base_directories:
-                    friend_paths.append(os.path.join(
-                        friends_base_directory, name, "{}.root".format(name)))
-                for friend_path in friend_paths:
-                    if os.path.isfile(friend_path):
-                        friends.append(Friend(friend_path, tdf_tree))
-                    else:
-                        logger.fatal(
-                            'File {} does not exist, abort'.format(
-                                friend_path))
-                        raise FileNotFoundError(
-                            'File {} does not exist, abort'.format(
-                                friend_path))
-                ntuples.append(Ntuple(root_file, tdf_tree, friends))
-        dataset = Dataset(dataset_name, ntuples,
-                file_names,
-                folder,
-                files_base_directories,
-                friends_base_directories)
-
-        return dataset
-
-dataset_from_nameset = DatasetFromNameSet()
 
 class Unit:
     """
