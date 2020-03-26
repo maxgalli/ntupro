@@ -54,7 +54,7 @@ class RunManager:
             results.append(th)
         return results
 
-    def run_locally(self, output, nworkers, nthreads):
+    def run_locally(self, output, nworkers = 1, nthreads = 1):
         """Save to file the histograms booked.
 
         Args:
