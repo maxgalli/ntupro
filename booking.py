@@ -83,7 +83,7 @@ def dataset_from_artusoutput(
             friends.append(Friend(friend_path, tdf_tree_friend))
         ntuples.append(Ntuple(root_file, tdf_tree, friends))
 
-    return Dataset(dataset_name, ntuples, file_names, folder, files_base_directory, friends_base_directories)
+    return Dataset(dataset_name, ntuples)
 
 
 class Unit:

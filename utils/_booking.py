@@ -65,13 +65,9 @@ class Ntuple(NtupleBase):
 
 
 class Dataset:
-
-    def __init__(self, name, ntuples,
-            *build_info):
+    def __init__(self, name, ntuples):
         self.name = name
         self.ntuples = ntuples
-        if build_info:
-            self.__set_build_info(*build_info)
 
     def __str__(self):
         return 'Dataset-{}'.format(self.name)
@@ -82,16 +78,6 @@ class Dataset:
     def add_to_ntuples(self, *new_ntuples):
         for new_ntuple in new_ntuples:
             self.ntuples.append(new_ntuple)
-
-    def __set_build_info(self, *build_info):
-        self._build_info = dict()
-        keys = [
-            'file_names', 'folder',
-            'files_base_directories',
-            'friends_base_directories'
-            ]
-        for key, info in zip(keys, build_info):
-            self._build_info[key] = info
 
     def __eq__(self, other):
         return self.name == other.name and \

@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from .booking import Unit
 from .booking import dataset_from_artusoutput
 from .utils import Selection
@@ -9,21 +11,44 @@ logger = logging.getLogger(__name__)
 
 
 class ChangeDataset(Variation):
+    """
+    Variation that with the method create makes a deepcopy of
+    the dataset inside the unit passed as argument and substitutes
+    the directory attribute with folder_name.
+
+    Args:
+        name (str): name used to identify the instance of
+            this class
+        folder_name (str): part of the name of the TDirectoryFile
+            in the new dataset following the prefix 'channel_' and
+            preceding the suffix '/tree_name', e.g. 'NewFolder' in
+            'mt_NewFolder/ntuple'
+
+    Attributes:
+        name (str): name used to identify the instance of
+            this class
+        folder_name (str): part of the name of the TDirectoryFile
+            in the new dataset following the prefix 'channel_' and
+            preceding the suffix '/tree_name', e.g. 'NewFolder' in
+            'mt_NewFolder/ntuple'
+    """
     def __init__(self,
             name, folder_name):
         Variation.__init__(self, name)
         self.folder_name = folder_name
 
     def create(self, unit):
-        new_folder_name = unit.dataset._build_info['folder'].split('_')[0]\
-            + '_'\
-            + self.folder_name
-        new_dataset = dataset_from_artusoutput(
-                self.folder_name + '_' + unit.dataset.name,
-                unit.dataset._build_info['file_names'],
-                new_folder_name,
-                unit.dataset._build_info['files_base_directories'],
-                unit.dataset._build_info['friends_base_directories'])
+        # A perfect copy of the daatset is exactly what
+        # we need, thus using deepcopy is fine
+        def change_folder(ntuple):
+            folder, tree = ntuple.directory.split('/')
+            ntuple.directory = '{}_{}/{}'.format(
+                    folder.split('_')[0], self.folder_name, tree)
+        new_dataset = deepcopy(unit.dataset)
+        for ntuple in new_dataset.ntuples:
+            change_folder(ntuple)
+            for friend in ntuple.friends:
+                change_folder(friend)
         return Unit(new_dataset, unit.selections, unit.actions, self)
 
 
