@@ -118,9 +118,7 @@ class Unit:
             variation = None):
         self.__set_dataset(dataset)
         self.__set_selections(selections)
-        self.__set_actions(actions)
-        if variation is not None:
-            self.__set_variation(variation)
+        self.__set_actions(actions, variation)
 
     def __str__(self):
         layout = '\n'.join([
@@ -145,7 +143,7 @@ class Unit:
                    'TypeError: not a Selection object.')
         self.selections = selections
 
-    def __set_actions(self, actions):
+    def __set_actions(self, actions, variation):
         if not isinstance(actions, list):
             raise TypeError(
                     'TypeError: not a list object.')
@@ -153,28 +151,24 @@ class Unit:
             if not isinstance(action, Action):
                 raise TypeError(
                    'TypeError: not an Action object.')
-        self.actions = [self.__set_new_action(action) \
+        self.actions = [self.__set_new_action(action, variation) \
                 for action in actions]
 
-    def __set_new_action(self, action):
-        name = '#'.join([action.variable,
-            self.dataset.name,
-            '-'.join([selection.name for selection in self.selections])])
+    def __set_new_action(self, action, variation):
+        if variation is None:
+            name = '#'.join([self.dataset.name,
+                '-'.join([selection.name for selection in self.selections]),
+                'Nominal', action.name])
+        else:
+            if not isinstance(variation, Variation):
+                raise TypeError(
+                   'TypeError: not a Variation object.')
+            self.variation = variation
+            name = action.name.replace('Nominal', self.variation.name)
         if isinstance(action, Histogram):
-            name = '#'.join([name, action.binning.name])
-            return Histogram(
-                    action.variable, action.binning.edges,
-                    name)
+            return Histogram(name, action.variable, action.edges)
         elif isinstance(action, Count):
-            return Count(action.variable, name)
-
-    def __set_variation(self, variation):
-        if not isinstance(variation, Variation):
-            raise TypeError(
-               'TypeError: not a Variation object.')
-        self.variation = variation
-        for action in self.actions:
-            action.name = '#'.join([action.name, self.variation.name])
+            return Count(name, action.variable)
 
     def __eq__(self, other):
         return self.dataset == other.dataset and \
