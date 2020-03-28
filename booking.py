@@ -1,6 +1,5 @@
 from .utils import Dataset
 from .utils import Selection
-from .utils import Friend
 from .utils import Ntuple
 from .utils import Cut
 from .utils import Weight
@@ -16,6 +15,7 @@ from ROOT import TFile
 import os
 import re
 import json
+import itertools
 
 import logging
 logger = logging.getLogger(__name__)
@@ -65,6 +65,28 @@ def dataset_from_artusoutput(
         full_tree_name = '/'.join([folder, tree_name])
         return full_tree_name
 
+    def add_tagged_friends(friends):
+        """ Tag friends with the name of the different directories
+        in the artus name scheme, e.g.:
+        /common_path/MELA/ntuple -> tag: MELA
+        /common_path/SVFit/ntuple -> tag: SVFit
+        Since when we compare two ntuples (with full path) only one
+        directory changes in this scheme (see MELA vs SVFit), we
+        create a list called 'tags' with these two strings; then we
+        assign this string to friend.tag, if it's None
+        """
+        for f1, f2 in itertools.combinations(friends, 2):
+            l1 = f1.path.split('/')
+            l2 = f2.path.split('/')
+            tags = list(set(l1).symmetric_difference(set(l2)))
+            if tags:
+                for t in tags:
+                    if t in l1 and f1.tag is None:
+                        f1.tag = t
+                    elif t in l2 and f2.tag is None:
+                        f2.tag = t
+        return friends
+
     # E.g.: file_base_dir/file_name/file_name.root
     root_files = [os.path.join(files_base_directory, f, "{}.root".format(f)) for f in file_names]
 
@@ -80,8 +102,8 @@ def dataset_from_artusoutput(
             if tdf_tree != tdf_tree_friend:
                 logger.fatal("Extracted wrong TDirectoryFile from friend which is not the same than the base file.")
                 raise Exception
-            friends.append(Friend(friend_path, tdf_tree_friend))
-        ntuples.append(Ntuple(root_file, tdf_tree, friends))
+            friends.append(Ntuple(friend_path, tdf_tree_friend))
+        ntuples.append(Ntuple(root_file, tdf_tree, add_tagged_friends(friends)))
 
     return Dataset(dataset_name, ntuples)
 

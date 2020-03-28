@@ -1,20 +1,23 @@
 import logging
 logger = logging.getLogger(__name__)
 
-import itertools
 
 
-
-class NtupleBase:
-
-    def __init__(self, path, directory):
+class Ntuple:
+    def __init__(self, path, directory,
+            friends = None, tag = None):
         self.path = path
         self.directory = directory
+        if friends is not None:
+            self.friends = friends
+        self.tag = tag
 
     def __str__(self):
-        layout = '(' + self.path \
-                + ', ' + self.directory \
-                + ')'
+        if self.tag is None:
+            layout = '({}, {})'.format(self.path, self.directory)
+        else:
+            layout = '({}, {}, tag = {})'.format(
+                    self.path, self.directory, self.tag)
         return layout
 
     def __eq__(self, other):
@@ -24,44 +27,6 @@ class NtupleBase:
     def __hash__(self):
         return hash((
             self.path, self.directory))
-
-
-class Friend(NtupleBase):
-
-    def __init__(self,
-            path, directory, tag = None):
-        NtupleBase.__init__(self, path, directory)
-        self.tag = tag
-
-    def __str__(self):
-        if self.tag is None:
-            return NtupleBase.__str__(self)
-        else:
-            layout = '(' + self.path \
-                    + ', ' + self.directory \
-                    + ', ' + 'tag = {}'.format(self.tag) \
-                    + ')'
-        return layout
-
-
-class Ntuple(NtupleBase):
-
-    def __init__(self, path, directory, friends = []):
-        NtupleBase.__init__(self, path, directory)
-        self.friends = self.__add_tagged_friends(friends)
-
-    def __add_tagged_friends(self, friends):
-        for f1,f2 in itertools.combinations(friends, 2):
-            l1 = f1.path.split('/')
-            l2 = f2.path.split('/')
-            tags = list(set(l1).symmetric_difference(set(l2)))
-            if tags:
-                for t in tags:
-                    if t in l1 and f1.tag is None:
-                        f1.tag = t
-                    elif t in l2 and f2.tag is None:
-                        f2.tag = t
-        return friends
 
 
 class Dataset:
