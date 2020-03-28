@@ -208,26 +208,11 @@ class Selection:
                         'TypeError: a list is needed.\n')
 
 
-class Binning:
-    def __init__(self,
-            name, edges):
-        self.name = name
-        self.edges = edges
-        self.nbins = len(edges) - 1
-
-    def __eq__(self, other):
-        return self.name == other.name and \
-            self.edges == other.edges
-
-    def __hash__(self):
-        return hash((
-            self.name, tuple(self.edges)))
-
 class Action:
     def __init__(self,
-            variable, name = None):
-        self.variable = variable
+            name, variable):
         self.name = name
+        self.variable = variable
 
     def __str__(self):
         return  self.name
@@ -239,20 +224,16 @@ class Count(Action):
 
 class Histogram(Action):
     def __init__(
-            self, variable,
-            edges = None, name = None):
-        Action.__init__(self, variable, name)
-        if isinstance(variable, Binning) and edges is None:
-            self.binning = variable
-        else:
-            self.binning = Binning(
-                variable, edges)
+            self, name,
+            variable, edges):
+        Action.__init__(self, name, variable)
+        self.edges = edges
+        self.nbins = len(edges) - 1
+
     def __eq__(self, other):
-        return self.variable == other.variable and \
-            self.binning == other.binning and \
-            self.name == other.name
+        return self.name == other.name and \
+            self.variable == other.variable and \
+            self.edges == other.edges
 
     def __hash__(self):
-        return hash((
-            self.variable, self.binning,
-            self.name))
+        return hash((self.name, self.variable, tuple(self.edges)))
