@@ -126,14 +126,16 @@ class RunManager:
         else:
             raise NameError(
                 'Impossible to create RDataFrame with different tree names')
-        chain = TChain(tree_name, tree_name)
+        chain = TChain()
         ftag_fchain = {}
         for ntuple in dataset.ntuples:
-            chain.Add(ntuple.path)
+            chain.Add('{}/{}'.format(
+                ntuple.path, ntuple.directory))
             for friend in ntuple.friends:
                 if friend.tag not in ftag_fchain.keys():
-                    ftag_fchain[friend.tag] = TChain(friend.directory, friend.directory)
-                ftag_fchain[friend.tag].Add(friend.path)
+                    ftag_fchain[friend.tag] = TChain()
+                ftag_fchain[friend.tag].Add('{}/{}'.format(
+                    friend.path, friend.directory))
         for ch in ftag_fchain.values():
             chain.AddFriend(ch)
             # Keep friend chains alive
