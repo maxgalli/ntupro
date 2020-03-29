@@ -225,6 +225,10 @@ class UnitManager:
                 logger.debug('Applying variation {}'.format(variation))
                 for unit in units:
                     self.apply_variation(unit, variation)
+        for action1, action2 in itertools.combinations([j for i in [
+            unit.actions for unit in self.booked_units] for j in i], 2):
+            if action1.name == action2.name:
+                logger.warning('Caught two actions with same name')
 
     def apply_variation(self, unit, variation):
         new_unit = variation.create(unit)
