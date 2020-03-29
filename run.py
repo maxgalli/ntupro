@@ -43,6 +43,7 @@ class RunManager:
         self.graphs = graphs
         self.tchains = list()
         self.friend_tchains = list()
+        self.rcws = list()
 
     def _run_multiprocess(self, graph):
         ptrs = self.node_to_root(graph)
@@ -52,6 +53,11 @@ class RunManager:
         for ptr in ptrs:
             th = ptr.GetValue()
             results.append(th)
+        # Sanity check: event loop run only once for each RDataFrame
+        for rcw in self.rcws:
+            loops = rcw.frame.GetNRuns()
+            if loops != 1:
+                logger.warning('Event loop run {} times'.format(loops))
         return results
 
     def run_locally(self, output, nworkers = 1, nthreads = 1):
@@ -96,6 +102,8 @@ class RunManager:
                 node))
             result = self.__rdf_from_dataset(
                 node.unit_block)
+            if result not in self.rcws:
+                self.rcws.append(result)
         elif node.kind == 'selection':
             if len(node.children) > 1:
                 logger.debug('%%%%%%%%%% node_to_root, converting to ROOT language the following crossroad node\n{}'.format(
