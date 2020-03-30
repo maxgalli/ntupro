@@ -151,28 +151,23 @@ class Unit:
 
     def __set_dataset(self, dataset):
         if not isinstance(dataset, Dataset):
-            raise TypeError(
-                'TypeError: not a Dataset object.')
+            raise TypeError('not a Dataset object.')
         self.dataset = dataset
 
     def __set_selections(self, selections):
         if not isinstance(selections, list):
-            raise TypeError(
-                'TypeError: not a list object.')
+            raise TypeError('not a list object.')
         for selection in selections:
             if not isinstance(selection, Selection):
-                raise TypeError(
-                   'TypeError: not a Selection object.')
+                raise TypeError('not a Selection object.')
         self.selections = selections
 
     def __set_actions(self, actions, variation):
         if not isinstance(actions, list):
-            raise TypeError(
-                    'TypeError: not a list object.')
+            raise TypeError('not a list object.')
         for action in actions:
             if not isinstance(action, Action):
-                raise TypeError(
-                   'TypeError: not an Action object.')
+                raise TypeError('not an Action object.')
         self.actions = [self.__set_new_action(action, variation) \
                 for action in actions]
 
@@ -183,8 +178,7 @@ class Unit:
                 'Nominal', action.name])
         else:
             if not isinstance(variation, Variation):
-                raise TypeError(
-                   'TypeError: not a Variation object.')
+                raise TypeError('not a Variation object.')
             self.variation = variation
             name = action.name.replace('Nominal', self.variation.name)
         if isinstance(action, Histogram):

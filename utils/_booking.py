@@ -150,11 +150,9 @@ class Selection:
                     elif isinstance(cut, tuple):
                         self.cuts.append(Cut(*cut))
                     else:
-                        raise TypeError(
-                                'TypeError: Not a Cut object or tuple')
+                        raise TypeError('not a Cut object or tuple')
             else:
-                raise TypeError(
-                        'TypeError: a list is needed.\n')
+                raise TypeError('a list is needed')
 
     def set_weights(self, weights):
         self.weights = list()
@@ -166,11 +164,9 @@ class Selection:
                     elif isinstance(weight, tuple):
                         self.weights.append(Weight(*weight))
                     else:
-                        raise TypeError(
-                                'TypeError: Not a Weight object or tuple')
+                        raise TypeError('not a Weight object or tuple')
             else:
-                raise TypeError(
-                        'TypeError: a list is needed.\n')
+                raise TypeError('a list is needed')
 
 
 class Action:

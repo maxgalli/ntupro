@@ -71,14 +71,14 @@ class RunManager:
                 EnableImplicitMT function
         """
         if not isinstance(nthreads, int):
-            raise TypeError('TypeError: wrong type for nthreads')
+            raise TypeError('wrong type for nthreads')
         if nthreads < 1:
-            raise ValueError('ValueError: nthreads has to be larger zero')
+            raise ValueError('nthreads has to be larger zero')
         self.nthreads = nthreads
         if not isinstance(nworkers, int):
-            raise TypeError('TypeError: wrong type for nworkers')
+            raise TypeError('wrong type for nworkers')
         if nworkers < 1:
-            raise ValueError('ValueError: nworkers has to be larger zero')
+            raise ValueError('nworkers has to be larger zero')
         logger.info('Start computing locally results of {} graphs using {} workers with {} threads each'.format(
             len(self.graphs), nworkers, nthreads))
         start = time()
