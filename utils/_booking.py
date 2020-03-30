@@ -189,7 +189,6 @@ class Histogram(Action):
             variable, edges):
         Action.__init__(self, name, variable)
         self.edges = edges
-        self.nbins = len(edges) - 1
 
     def __eq__(self, other):
         return self.name == other.name and \

@@ -172,8 +172,8 @@ class RunManager:
     def __histo1d_from_histo(self, rcw, histogram):
         name = histogram.name
         var = histogram.variable
-        nbins = histogram.nbins
         edges = histogram.edges
+        nbins = len(edges) - 1
 
         # Create macro weight string from sub-weights applied
         # (saved earlier as rdf columns)
