@@ -222,7 +222,9 @@ class UnitManager:
         for action1, action2 in itertools.combinations([j for i in [
             unit.actions for unit in self.booked_units] for j in i], 2):
             if action1.name == action2.name:
-                raise NameError('Caught two actions with same name')
+                logger.fatal('Caught two actions with same name ({}, {})'.format(
+                    action1.name, action2.name))
+                raise NameError
 
     def apply_variation(self, unit, variation):
         new_unit = variation.create(unit)
