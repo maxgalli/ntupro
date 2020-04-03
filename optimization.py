@@ -132,6 +132,7 @@ class GraphManager:
                             merged_graph.children.append(child)
         self.graphs = merged_graphs
         logger.debug('%%%%%%%%%% Merging datasets: DONE')
+        logger.debug('Merged graphs:\n{}'.format(self.get_pretty_printed_merged_graphs()))
 
     def optimize_selections(self):
         logger.debug('%%%%%%%%%% Optimizing selections:')
@@ -139,13 +140,11 @@ class GraphManager:
             self._merge_children(merged_graph)
         logger.debug('%%%%%%%%%% Optimizing selections: DONE')
 
-    def print_merged_graphs(self):
+    def get_pretty_printed_merged_graphs(self):
         def call_node_rec(nd):
             return PrintedNode(nd.__repr__())([call_node_rec(child) for child in nd.children])
         fancy_trees = [call_node_rec(graph) for graph in self.graphs]
-        logger.debug('Merged graphs:')
-        logger.debug('\n\n'.join([
-            drawTree2(False)(False)(t) for t in fancy_trees]))
+        return '\n\n'.join([drawTree2(False)(False)(t) for t in fancy_trees])
 
     def _merge_children(self, node):
         '''For every node, loops through the children
