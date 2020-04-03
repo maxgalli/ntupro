@@ -46,6 +46,7 @@ class RunManager:
         self.rcws = list()
 
     def _run_multiprocess(self, graph):
+        start = time()
         ptrs = self.node_to_root(graph)
         logger.debug('%%%%%%%%%% Ready to produce a subset of {} shapes'.format(
             len(ptrs)))
@@ -58,6 +59,9 @@ class RunManager:
             loops = rcw.frame.GetNRuns()
             if loops != 1:
                 logger.warning('Event loop run {} times'.format(loops))
+        end = time()
+        logger.debug('Event loop for graph {} run in {} seconds'.format(
+            repr(graph), end - start))
         return results
 
     def run_locally(self, output, nworkers = 1, nthreads = 1):
@@ -79,7 +83,7 @@ class RunManager:
             raise TypeError('wrong type for nworkers')
         if nworkers < 1:
             raise ValueError('nworkers has to be larger zero')
-        logger.info('Start computing locally results of {} graphs using {} workers with {} threads each'.format(
+        logger.info('Start computing locally results of {} graphs using {} workers with {} thread(s) each'.format(
             len(self.graphs), nworkers, nthreads))
         start = time()
         pool = Pool(nworkers)
