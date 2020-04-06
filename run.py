@@ -60,7 +60,7 @@ class RunManager:
             if loops != 1:
                 logger.warning('Event loop run {} times'.format(loops))
         end = time()
-        logger.debug('Event loop for graph {} run in {} seconds'.format(
+        logger.debug('Event loop for graph {:} run in {:.2f} seconds'.format(
             repr(graph), end - start))
         return results
 
