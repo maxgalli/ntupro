@@ -118,6 +118,7 @@ class GraphManager:
             logger.debug('Invalid level of optimization, default to FULL OPTIMIZED.')
             self.merge_datasets()
             self.optimize_selections()
+        logger.debug('Merged graphs:\n{}'.format(self.get_pretty_printed_merged_graphs()))
 
     def merge_datasets(self):
         logger.debug('%%%%%%%%%% Merging datasets:')
@@ -132,7 +133,6 @@ class GraphManager:
                             merged_graph.children.append(child)
         self.graphs = merged_graphs
         logger.debug('%%%%%%%%%% Merging datasets: DONE')
-        logger.debug('Merged graphs:\n{}'.format(self.get_pretty_printed_merged_graphs()))
 
     def optimize_selections(self):
         logger.debug('%%%%%%%%%% Optimizing selections:')
