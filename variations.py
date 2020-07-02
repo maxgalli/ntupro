@@ -197,3 +197,14 @@ class SquareWeight(Variation):
                     weight.square()
         return Unit(unit.dataset, new_selections, unit.actions, self)
 
+
+class ReplaceCutAndAddWeight(Variation):
+    def __init__(self,
+            name, replaced_name, cut, weight):
+        Variation.__init__(self, name)
+        self.replace_cut = ReplaceCut(name, replaced_name, cut)
+        self.add_weight = AddWeight(name, weight)
+
+    def create(self, unit):
+        unit = self.replace_cut.create(unit)
+        return self.add_weight.create(unit)
