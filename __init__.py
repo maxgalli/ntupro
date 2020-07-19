@@ -1,3 +1,5 @@
+from .booking import Ntuple
+from .booking import Dataset
 from .booking import Histogram
 from .booking import dataset_from_artusoutput
 from .booking import Unit
