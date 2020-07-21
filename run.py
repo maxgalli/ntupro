@@ -177,7 +177,12 @@ class RunManager:
         name = histogram.name
         var = histogram.variable
         edges = histogram.edges
-        nbins = len(edges) - 1
+        if edges:
+            nbins = len(edges) - 1
+        else:
+            nbins = histogram.nbins
+            low = histogram.low
+            up = histogram.up
         var_expression = histogram.expression
 
         # Create column from expression if present in Histogram object
@@ -195,22 +200,33 @@ class RunManager:
             rcw.frame = rcw.frame.Filter(cut_expression)
 
         # Create std::vector with the histogram edges
-        l_edges = vector['double']()
-        for edge in edges:
-            l_edges.push_back(edge)
+        if edges:
+            l_edges = vector['double']()
+            for edge in edges:
+                l_edges.push_back(edge)
 
         if not weight_expression:
             logger.debug('%%%%%%%%%% Attaching histogram called {}'.format(name))
-            histo = rcw.frame.Histo1D((
-                    name, name, nbins, l_edges.data()),
-                    var)
+            if edges:
+                histo = rcw.frame.Histo1D((
+                        name, name, nbins, l_edges.data()),
+                        var)
+            else:
+                histo = rcw.frame.Histo1D((
+                        name, name, nbins, low, up),
+                        var)
         else:
             weight_name = name.replace('#', '_')
             weight_name = weight_name.replace('-', '_')
             rcw.frame = rcw.frame.Define(weight_name, weight_expression)
             logger.debug('%%%%%%%%%% Attaching histogram called {}'.format(name))
-            histo = rcw.frame.Histo1D((
-                name, name, nbins, l_edges.data()),
-                var, weight_name)
+            if edges:
+                histo = rcw.frame.Histo1D((
+                    name, name, nbins, l_edges.data()),
+                    var, weight_name)
+            else:
+                histo = rcw.frame.Histo1D((
+                    name, name, nbins, low, up),
+                    var, weight_name)
 
         return histo

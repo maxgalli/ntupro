@@ -213,7 +213,11 @@ class Unit:
             self.variation = variation
             name = action.name.replace('Nominal', self.variation.name)
         if isinstance(action, Histogram):
-            return Histogram(name, action.variable, action.edges)
+            if action.edges:
+                return Histogram(name, action.variable, action.edges, action.expression)
+            else:
+                return Histogram(name, action.variable,
+                        (action.nbins, action.low, action.up), action.expression)
         elif isinstance(action, Count):
             return Count(name, action.variable)
 

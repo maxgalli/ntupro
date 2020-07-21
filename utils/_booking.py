@@ -184,15 +184,31 @@ class Count(Action):
 
 
 class Histogram(Action):
-    def __init__(self, name, variable, edges, expression = None):
+    def __init__(self, name, variable, setting, expression = None):
         Action.__init__(self, name, variable)
-        self.edges = edges
+        if isinstance(setting, list):
+            self.edges = setting
+        elif isinstance(setting, tuple):
+            self.nbins, self.low, self.up = setting
+            self.edges = None
+        else:
+            raise TypeError('Argument {} must be either list or tuple'.format(setting))
         self.expression = expression
 
     def __eq__(self, other):
-        return self.name == other.name and \
-            self.variable == other.variable and \
-            self.edges == other.edges
+        if self.edges:
+            return self.name == other.name and \
+                self.variable == other.variable and \
+                self.edges == other.edges
+        else:
+            return self.name == other.name and \
+                self.variable == other.variable and \
+                self.nbins == other.nbins and \
+                self.low == other.low and \
+                self.up == other.up
 
     def __hash__(self):
-        return hash((self.name, self.variable, tuple(self.edges)))
+        if self.edges:
+            return hash((self.name, self.variable, tuple(self.edges)))
+        else:
+            return hash((self.name, self.variable, self.nbins, self.low, self.up))
