@@ -1,5 +1,6 @@
 from .booking import Ntuple
 from .booking import Dataset
+from .booking import Selection
 from .booking import Histogram
 from .booking import dataset_from_artusoutput
 from .booking import dataset_from_files
