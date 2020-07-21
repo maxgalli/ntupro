@@ -108,6 +108,42 @@ def dataset_from_artusoutput(
     return Dataset(dataset_name, ntuples)
 
 
+def dataset_from_files(dataset_name, tree_name, file_names):
+    """Create a Dataset object from a list containing the names
+    of the ROOT files (e.g. [root_file1, root_file2, (...)]):
+    E.g.:
+        my_dataset = dataset_from_files('my_dataset', 'tree_name', ['f1.root', 'f2.root'])
+
+    Args:
+        dataset_name (str): Name of the dataset
+        tree_name (str): Name of the tree spanned through multiple files
+        file_names (list): List containing the names of the .root
+            files
+
+    Returns:
+        dataset (Dataset): Dataset object containing TTrees
+    """
+    def return_existent_tuple(file_name, tree_name):
+        # Use TFile.Open() instead of TFile() in order to deal with
+        # files accessed from remote
+        root_file = TFile.Open(file_name)
+        if root_file.IsZombie():
+            logger.fatal('File {} does not exist, abort'.format(file_name))
+            raise FileNotFoundError
+        if tree_name not in root_file.GetListOfKeys():
+            logger.fatal('Tree {} does not exist in {}\n'.format(tree_name, file_name))
+            raise NameError
+        root_file.Close()
+        return Ntuple(file_name, tree_name)
+
+    if not isinstance(file_names, list):
+        raise TypeError('A list containing file names is required')
+
+    ntuples = [return_existent_tuple(file_name, tree_name) for file_name in file_names]
+
+    return Dataset(dataset_name, ntuples)
+
+
 class Unit:
     """
     Building element of a minimal analysis flow, consisting
@@ -195,6 +231,7 @@ class Unit:
         return hash((
             self.dataset, tuple(self.selections),
             tuple(self.actions)))
+
 
 class UnitManager:
     """
