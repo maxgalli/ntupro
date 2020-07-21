@@ -103,6 +103,9 @@ class Selection:
     def __str__(self):
         return 'Selection-{}'.format(self.name)
 
+    def __repr__(self):
+        return 'Selection-{}'.format(self.name)
+
     def __eq__(self, other):
         return self.cuts == other.cuts and \
             self.weights == other.weights
@@ -178,6 +181,8 @@ class Action:
     def __str__(self):
         return  self.name
 
+    def __repr__(self):
+        return  self.name
 
 class Count(Action):
     pass

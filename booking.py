@@ -176,8 +176,8 @@ class Unit:
     def __str__(self):
         layout = '\n'.join([
             'Dataset: {}'.format(self.dataset.name),
-            'Selections: {}'.format(self.selections),
-            'Actions: {}'.format(self.actions)])
+            'Selections: {}'.format(self.selections.__repr__()),
+            'Actions: {}'.format(self.actions.__repr__())])
         return layout
 
     def __set_dataset(self, dataset):
