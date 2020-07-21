@@ -1,6 +1,6 @@
 import unittest
 
-from ntuple_processor.booking import Ntuple, Dataset, Cut, Weight
+from ntupro.booking import Ntuple, Dataset, Cut, Weight
 
 
 class TestBookingMethods(unittest.TestCase):
