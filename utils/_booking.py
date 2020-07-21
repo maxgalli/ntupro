@@ -8,8 +8,10 @@ class Ntuple:
             friends = None, tag = None):
         self.path = path
         self.directory = directory
-        if friends is not None:
+        if friends:
             self.friends = friends
+        else:
+            self.friends = list()
         self.tag = tag
 
     def __str__(self):
