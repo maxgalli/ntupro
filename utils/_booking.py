@@ -184,11 +184,10 @@ class Count(Action):
 
 
 class Histogram(Action):
-    def __init__(
-            self, name,
-            variable, edges):
+    def __init__(self, name, variable, edges, expression = None):
         Action.__init__(self, name, variable)
         self.edges = edges
+        self.expression = expression
 
     def __eq__(self, other):
         return self.name == other.name and \

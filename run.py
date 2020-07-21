@@ -178,6 +178,11 @@ class RunManager:
         var = histogram.variable
         edges = histogram.edges
         nbins = len(edges) - 1
+        var_expression = histogram.expression
+
+        # Create column from expression if present in Histogram object
+        if var_expression:
+            rcw.frame = rcw.frame.Define(var, var_expression)
 
         # Create macro weight string from sub-weights applied
         # (saved earlier as rdf columns)
