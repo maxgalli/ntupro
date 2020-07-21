@@ -56,11 +56,9 @@ def dataset_from_artusoutput(
     def get_full_tree_name(folder, path_to_root_file, tree_name):
         root_file = TFile(path_to_root_file)
         if root_file.IsZombie():
-            logger.fatal('File {} does not exist, abort'.format(path_to_root_file))
-            raise FileNotFoundError
+            raise FileNotFoundError('File {} does not exist, abort'.format(path_to_root_file))
         if folder not in root_file.GetListOfKeys():
-            logger.fatal('Folder {} does not exist in {}\n'.format(folder, path_to_root_file))
-            raise NameError
+            raise NameError('Folder {} does not exist in {}\n'.format(folder, path_to_root_file))
         root_file.Close()
         full_tree_name = '/'.join([folder, tree_name])
         return full_tree_name
@@ -100,8 +98,7 @@ def dataset_from_artusoutput(
             friend_path = os.path.join(friends_base_directory, file_name, "{}.root".format(file_name))
             tdf_tree_friend = get_full_tree_name(folder, friend_path, 'ntuple')
             if tdf_tree != tdf_tree_friend:
-                logger.fatal("Extracted wrong TDirectoryFile from friend which is not the same than the base file.")
-                raise Exception
+                raise Exception("Extracted wrong TDirectoryFile from friend which is not the same than the base file.")
             friends.append(Ntuple(friend_path, tdf_tree_friend))
         ntuples.append(Ntuple(root_file, tdf_tree, add_tagged_friends(friends)))
 
@@ -128,11 +125,9 @@ def dataset_from_files(dataset_name, tree_name, file_names):
         # files accessed from remote
         root_file = TFile.Open(file_name)
         if root_file.IsZombie():
-            logger.fatal('File {} does not exist, abort'.format(file_name))
-            raise FileNotFoundError
+            raise FileNotFoundError('File {} does not exist, abort'.format(file_name))
         if tree_name not in root_file.GetListOfKeys():
-            logger.fatal('Tree {} does not exist in {}\n'.format(tree_name, file_name))
-            raise NameError
+            raise NameError('Tree {} does not exist in {}\n'.format(tree_name, file_name))
         root_file.Close()
         return Ntuple(file_name, tree_name)
 
@@ -259,9 +254,8 @@ class UnitManager:
         for action1, action2 in itertools.combinations([j for i in [
             unit.actions for unit in self.booked_units] for j in i], 2):
             if action1.name == action2.name:
-                logger.fatal('Caught two actions with same name ({}, {})'.format(
+                raise NameError('Caught two actions with same name ({}, {})'.format(
                     action1.name, action2.name))
-                raise NameError
 
     def apply_variation(self, unit, variation):
         new_unit = variation.create(unit)

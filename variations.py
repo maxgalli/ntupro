@@ -64,8 +64,7 @@ class ReplaceCut(Variation):
         # error if not
         if not set([cut.name for selection in unit.selections for cut in selection.cuts \
                 if cut.name == self.replaced_name]):
-            logger.fatal('Cut {} not found in any selection of this Unit'.format(self.replaced_name))
-            raise NameError
+            raise NameError('Cut {} not found in any selection of this Unit'.format(self.replaced_name))
         new_selections = list()
         for selection in unit.selections:
             copy_cuts = list()
@@ -95,8 +94,7 @@ class ReplaceWeight(Variation):
         # error if not
         if not set([weight.name for selection in unit.selections for weight in selection.weights \
                 if weight.name == self.replaced_name]):
-            logger.fatal('Weight {} not found in any selection of this Unit'.format(self.replaced_name))
-            raise NameError
+            raise NameError('Weight {} not found in any selection of this Unit'.format(self.replaced_name))
         new_selections = list()
         for selection in unit.selections:
             copy_weights = list()
@@ -125,8 +123,7 @@ class RemoveCut(Variation):
         # error if not
         if not set([cut.name for selection in unit.selections for cut in selection.cuts \
                 if cut.name == self.removed_name]):
-            logger.fatal('Cut {} not found in any selection of this Unit'.format(self.removed_name))
-            raise NameError
+            raise NameError('Cut {} not found in any selection of this Unit'.format(self.removed_name))
         new_selections = [selection for selection in unit.selections]
         for new_selection in new_selections:
             new_selection.remove_cut(self.removed_name)
@@ -143,8 +140,7 @@ class RemoveWeight(Variation):
         # error if not
         if not set([weight.name for selection in unit.selections for weight in selection.weights \
                 if weight.name == self.removed_name]):
-            logger.fatal('Weight {} not found in any selection of this Unit'.format(self.removed_name))
-            raise NameError
+            raise NameError('Weight {} not found in any selection of this Unit'.format(self.removed_name))
         new_selections = [selection for selection in unit.selections]
         for new_selection in new_selections:
             new_selection.remove_weight(self.removed_name)
@@ -188,8 +184,7 @@ class SquareWeight(Variation):
         # error if not
         if not set([weight.name for selection in unit.selections for weight in selection.weights \
                 if weight.name == self.weight_name]):
-            logger.fatal('Weight {} not found in any selection of this Unit'.format(self.weight_name))
-            raise NameError
+            raise NameError('Weight {} not found in any selection of this Unit'.format(self.weight_name))
         new_selections = [selection for selection in unit.selections]
         for new_selection in new_selections:
             for weight in new_selection.weights:
