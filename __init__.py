@@ -9,3 +9,4 @@ from .booking import UnitManager
 from .optimization import GraphManager
 from .run import RunManager
 from .variations import ReplaceCut
+from .inspect import get_dataframe

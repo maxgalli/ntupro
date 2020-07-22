@@ -4,6 +4,7 @@ from time import time
 from .utils import Count
 from .utils import Histogram
 from .utils import RDataFrameCutWeight
+from .utils import rdf_from_dataset_helper
 
 from ROOT import gROOT
 gROOT.SetBatch(True)
@@ -131,27 +132,7 @@ class RunManager:
         return final_results
 
     def __rdf_from_dataset(self, dataset):
-        t_names = [ntuple.directory for ntuple in \
-            dataset.ntuples]
-        if len(set(t_names)) == 1:
-            tree_name = t_names.pop()
-        else:
-            raise NameError(
-                'Impossible to create RDataFrame with different tree names')
-        chain = TChain()
-        ftag_fchain = {}
-        for ntuple in dataset.ntuples:
-            chain.Add('{}/{}'.format(
-                ntuple.path, ntuple.directory))
-            for friend in ntuple.friends:
-                if friend.tag not in ftag_fchain.keys():
-                    ftag_fchain[friend.tag] = TChain()
-                ftag_fchain[friend.tag].Add('{}/{}'.format(
-                    friend.path, friend.directory))
-        for ch in ftag_fchain.values():
-            chain.AddFriend(ch)
-            # Keep friend chains alive
-            self.friend_tchains.append(ch)
+        chain, self.friend_tchains = rdf_from_dataset_helper(dataset)
         if self.nthreads != 1:
             EnableImplicitMT(self.nthreads)
         # Keep main chain alive
