@@ -206,7 +206,7 @@ class Unit:
         if variation is None:
             name = '#'.join([self.dataset.name,
                 '-'.join([selection.name for selection in self.selections]),
-                'Nominal', action.name])
+                action.name, 'Nominal'])
         else:
             if not isinstance(variation, Variation):
                 raise TypeError('not a Variation object.')
