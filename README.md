@@ -1,4 +1,4 @@
-# ntupro
+<img src="docs/logo.jpeg">
 
 ## Structure
 
