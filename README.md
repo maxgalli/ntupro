@@ -90,7 +90,56 @@ class UnitManager:
         # Book units and apply variations
 ```
 
-## Examples  
+### Optimize Computations 
+In this stage, the goal is to merge the Units (*paths*) into *directed graphs*. The blocks that make the Units introduced in the previous part (i.e. Datasets, Selections and Actions) are treated as nodes of a graph. The common ones are merged in order to perform every action only once. At the end of this step, we end up with a set of trees. It is worth pointing out that there is a one-way relationship between graphs and datasets at the end of this step, i.e. we do not have two graphs with the same `Dataset` node.
+Three levels of optimization are implemented:
+
+* optimization 0: no optimization is implemented and the new software behaves like the current one;
+* optimization 1: only `Dataset` nodes are merged;
+* optimization 2: both `Dataset` and `Selection` nodes are merged.
+
+These steps bring a different amount of improvement.
+
+### Run Computations
+In this stage the ROOT facilities come into play. The optimized graphs created in the previous stage are converted into RDataFrame computational graphs. More specifically, each node of an abstract graph corresponds to a RDataFrame node type (e.g. `Filter`, `Histo1D`, etc.). The recursive function returns a list of pointers to the histograms for each graph. The event loop is run only at the end, once for each graph.
+In this stage two parallelization techniques are introduced: 
+ * *multithreading* is enabled with a call to the function `RDataFrame::EnableImplicitMT()`;
+* *multiprocessing* is enabled with the homonymous Python package; in this fashion, a pool of workers is set and the RDataFrame objects on which the event loop has to be run are sent one by one to them; when one of the workers is done, it gets the next object in the buffer.
+
+## Examples
+
+In the following, we report a simple (and completely unrealistic) example that produces three histograms after the application of two systematic variations.
+
+```python {.line-numbers}
+from ntuple_processor import Dataset, Unit, UnitManager, GraphManager, RunManager  
+  
+"""Create a Dataset  
+  
+my_ntuples is a list of Ntuple objects  
+"""  
+my_dataset = Dataset('my_dataset', my_ntuples)  
+  
+"""Create a Unit  
+  
+Remember: a Unit is made by the following elements:  
+Dataset - [Selections] - [Histograms]  
+"""  
+my_unit = Unit(my_dataset, [selection1, selection2], [histo_var1])  
+  
+# Set a Unit manager  
+um = UnitManager()  
+  
+# Book Units and apply systematic varations  
+um.book([my_unit], [sys_variation1, sys_variation2])  
+  
+# Create graphs from Units  
+graph_manager = GraphManager(um.booked_units)  
+graph_manager.optimize()  
+  
+# Run - Convert to RDataFrame  
+run_manager = RunManager(graph_manager.graphs)  
+run_manager.run_locally('file.root', nworkers = 1, nthreads = 2)
+```
   
 ## Tests  
 Before merging, check that all the tests are green by running  
