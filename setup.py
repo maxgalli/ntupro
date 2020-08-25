@@ -7,7 +7,7 @@ for line in readme:
         long_description += line
 
 setuptools.setup(
-    name="ntupro-magalli", # Replace with your own username
+    name="ntupro",
     version="0.0.0",
     author="Massimiliano Galli",
     author_email="massimiliano.galli.95@gmail.com",
