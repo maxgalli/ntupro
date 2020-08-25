@@ -1,7 +1,10 @@
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+readme = open("README.md", "r")
+long_description = ''
+for line in readme:
+    if not line.startswith('<img'):
+        long_description += line
 
 setuptools.setup(
     name="ntupro-magalli", # Replace with your own username
