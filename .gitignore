@@ -52,3 +52,7 @@ docs/_build/
 # vim
 *.swp
 *.swo
+
+# Tests output
+tests/samples/*
+tests/output_files/*
