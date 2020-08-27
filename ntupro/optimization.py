@@ -2,6 +2,9 @@ from copy import deepcopy
 from collections import Counter
 
 from .booking import Unit
+from .booking import Selection
+from .booking import Cut
+from .booking import Weight
 from .utils import Node
 from .utils import PrintedNode
 from .utils import drawTree2
@@ -57,20 +60,35 @@ class Graph(Node):
         nodes = list()
         last_node = list()
         for selection in unit.selections:
-            if self.split_selections:
-                sub_selections = selection.split()
-                for sub_selection in sub_selections:
+            if isinstance(selection, Selection):
+                if self.split_selections:
+                    sub_selections = selection.split()
+                    for sub_selection in sub_selections:
+                        nodes.append(
+                            Node(
+                                sub_selection.name,
+                                'selection',
+                                sub_selection))
+                else:
                     nodes.append(
                         Node(
-                            sub_selection.name,
+                            selection.name,
                             'selection',
-                            sub_selection))
+                            selection))
+            elif isinstance(selection, Cut):
+                nodes.append(Node(
+                    selection.name,
+                    'selection',
+                    Selection(selection.name, [selection], [])
+                    ))
+            elif isinstance(selection, Weight):
+                nodes.append(Node(
+                    selection.name,
+                    'selection',
+                    Selection(selection.name, [], [selection])
+                    ))
             else:
-                nodes.append(
-                    Node(
-                        selection.name,
-                        'selection',
-                        selection))
+                raise TypeError('Something went wrong in the booking stage')
         for action in unit.actions:
             last_node.append(
                 Node(

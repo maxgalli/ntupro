@@ -189,8 +189,8 @@ class Unit:
         if not isinstance(selections, list):
             raise TypeError('not a list object.')
         for selection in selections:
-            if not isinstance(selection, Selection):
-                raise TypeError('not a Selection object.')
+            if not isinstance(selection, (Selection, Cut, Weight)):
+                raise TypeError('not a Selection, Cut or Weight object.')
         self.selections = selections
 
     def __set_actions(self, actions, variation):

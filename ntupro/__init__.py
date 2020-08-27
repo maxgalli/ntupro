@@ -1,5 +1,7 @@
 from .booking import Ntuple
 from .booking import Dataset
+from .booking import Cut
+from .booking import Weight
 from .booking import Selection
 from .booking import Histogram
 from .booking import dataset_from_artusoutput
