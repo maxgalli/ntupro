@@ -1,6 +1,6 @@
 <img src="docs/images/logo.jpeg">
 
-Based on [ROOT](https://ph-root-2.cern.ch/) [RDataFrame](https://root.cern/doc/master/classROOT_1_1RDataFrame.html), NTupro is an innovative Python package which takes care of optimizing HEP analyses.  
+Based on [ROOT](https://ph-root-2.cern.ch/) [RDataFrame](https://root.cern/doc/master/classROOT_1_1RDataFrame.html), NTupro is an innovative Python package which takes care of optimizing HEP analyses.
 
 ## Motivation
 Cut-based analyses in HEP foresee a series of operations that are more or less common:
@@ -19,8 +19,8 @@ To produce their results, many physicists use the so called [TTree::Draw](https:
 
 Implementing a clean and friendly API to [RDataFrame](https://root.cern/doc/master/classROOT_1_1RDataFrame.html), NTupro allows to write minimal analysis flow units and automatically optimizes them, performing common operations only once, like in the following.
 <img src="docs/images/optimized_basic_units.png">
-  
-## Structure  
+
+## Structure
 NTupro is divided into three main parts, here briefly summarized and described in detail in the following subsections:
 
 * **Book Results**: for every histogram that we want to produce, we declare initial dataset, cuts, weights and systematic variations that need to be applied;
@@ -90,7 +90,7 @@ class UnitManager:
         # Book units and apply variations
 ```
 
-### Optimize Computations 
+### Optimize Computations
 In this stage, the goal is to merge the Units (*paths*) into *directed graphs*. The blocks that make the Units introduced in the previous part (i.e. Datasets, Selections and Actions) are treated as nodes of a graph. The common ones are merged in order to perform every action only once. At the end of this step, we end up with a set of trees. It is worth pointing out that there is a one-way relationship between graphs and datasets at the end of this step, i.e. we do not have two graphs with the same `Dataset` node.
 Three levels of optimization are implemented:
 
@@ -102,7 +102,7 @@ These steps bring a different amount of improvement.
 
 ### Run Computations
 In this stage the ROOT facilities come into play. The optimized graphs created in the previous stage are converted into RDataFrame computational graphs. More specifically, each node of an abstract graph corresponds to a RDataFrame node type (e.g. `Filter`, `Histo1D`, etc.). The recursive function returns a list of pointers to the histograms for each graph. The event loop is run only at the end, once for each graph.
-In this stage two parallelization techniques are introduced: 
+In this stage two parallelization techniques are introduced:
  * *multithreading* is enabled with a call to the function `RDataFrame::EnableImplicitMT()`;
 * *multiprocessing* is enabled with the homonymous Python package; in this fashion, a pool of workers is set and the RDataFrame objects on which the event loop has to be run are sent one by one to them; when one of the workers is done, it gets the next object in the buffer.
 
@@ -111,39 +111,39 @@ In this stage two parallelization techniques are introduced:
 In the following, we report a simple (and completely unrealistic) example that produces three histograms after the application of two systematic variations.
 
 ```python {.line-numbers}
-from ntuple_processor import Dataset, Unit, UnitManager, GraphManager, RunManager  
-  
-"""Create a Dataset  
-  
-my_ntuples is a list of Ntuple objects  
-"""  
-my_dataset = Dataset('my_dataset', my_ntuples)  
-  
-"""Create a Unit  
-  
-Remember: a Unit is made by the following elements:  
-Dataset - [Selections] - [Histograms]  
-"""  
-my_unit = Unit(my_dataset, [selection1, selection2], [histo_var1])  
-  
-# Set a Unit manager  
-um = UnitManager()  
-  
-# Book Units and apply systematic varations  
-um.book([my_unit], [sys_variation1, sys_variation2])  
-  
-# Create graphs from Units  
-graph_manager = GraphManager(um.booked_units)  
-graph_manager.optimize()  
-  
-# Run - Convert to RDataFrame  
-run_manager = RunManager(graph_manager.graphs)  
+from ntupro import Dataset, Unit, UnitManager, GraphManager, RunManager
+
+"""Create a Dataset
+
+my_ntuples is a list of Ntuple objects
+"""
+my_dataset = Dataset('my_dataset', my_ntuples)
+
+"""Create a Unit
+
+Remember: a Unit is made by the following elements:
+Dataset - [Selections] - [Histograms]
+"""
+my_unit = Unit(my_dataset, [selection1, selection2], [histo_var1])
+
+# Set a Unit manager
+um = UnitManager()
+
+# Book Units and apply systematic varations
+um.book([my_unit], [sys_variation1, sys_variation2])
+
+# Create graphs from Units
+graph_manager = GraphManager(um.booked_units)
+graph_manager.optimize()
+
+# Run - Convert to RDataFrame
+run_manager = RunManager(graph_manager.graphs)
 run_manager.run_locally('file.root', nworkers = 1, nthreads = 2)
 ```
-  
-## Tests  
-Before merging, check that all the tests are green by running  
-  
-```bash  
-$ python -m unittest -v  
+
+## Tests
+Before merging, check that all the tests are green by running
+
+```bash
+$ python -m unittest -v
 ```
