@@ -46,7 +46,7 @@ class RunManager:
         self.friend_tchains = list()
         self.rcws = list()
 
-    def _run_multiprocess(self, graph):
+    def _get_results_from_graph(self, graph):
         start = time()
         ptrs = self.node_to_root(graph)
         logger.debug('%%%%%%%%%% Ready to produce a subset of {} shapes'.format(
@@ -88,7 +88,7 @@ class RunManager:
             len(self.graphs), nworkers, nthreads))
         start = time()
         pool = Pool(nworkers)
-        final_results = list(pool.map(self._run_multiprocess, self.graphs))
+        final_results = list(pool.map(self._get_results_from_graph, self.graphs))
         final_results = [j for i in final_results for j in i]
         end = time()
         logger.info('Finished computations in {} seconds'.format(int(end - start)))
