@@ -99,6 +99,25 @@ class RunManager:
             op.Write()
         root_file.Close()
 
+    def run_on_htcondor(self, output, map_tag = 'ntupro'):
+        try:
+            import htmap
+        except ImportError:
+            raise ImportError('run_on_htcondor cannot run without htmap; install it with `pip install htmap` and try again')
+        logger.info('Start computing locally results of {} graphs on HTCondor'.format(len(self.graphs)))
+        start = time()
+        final_results = htmap.map(self._get_results_from_graph, self.graphs, tag = map_tag)
+        final_results.wait(show_progress_bar = True)
+        final_results = [j for i in final_results for j in i]
+        end = time()
+        logger.info('Finished computations in {} seconds'.format(int(end - start)))
+        logger.info('Write {} results from {} graphs to file {}'.format(
+            len(final_results), len(self.graphs), output))
+        root_file = TFile(output, 'RECREATE')
+        for op in final_results:
+            op.Write()
+        root_file.Close()
+
     def node_to_root(self, node, final_results = None, rcw = None):
         if final_results is None:
             final_results = list()
