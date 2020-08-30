@@ -136,7 +136,7 @@ class GraphManager:
             logger.debug('Invalid level of optimization, default to FULL OPTIMIZED.')
             self.merge_datasets()
             self.optimize_selections()
-        logger.debug('Merged graphs:\n{}'.format(self.get_pretty_printed_merged_graphs()))
+        logger.debug('Merged graphs:\n{}'.format(self._get_pretty_printed_graphs()))
 
     def merge_datasets(self):
         logger.debug('%%%%%%%%%% Merging datasets:')
@@ -158,7 +158,10 @@ class GraphManager:
             self._merge_children(merged_graph)
         logger.debug('%%%%%%%%%% Optimizing selections: DONE')
 
-    def get_pretty_printed_merged_graphs(self):
+    def print_graphs(self):
+        print(self._get_pretty_printed_graphs())
+
+    def _get_pretty_printed_graphs(self):
         def call_node_rec(nd):
             return PrintedNode(nd.__repr__())([call_node_rec(child) for child in nd.children])
         fancy_trees = [call_node_rec(graph) for graph in self.graphs]
