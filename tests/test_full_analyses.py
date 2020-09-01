@@ -64,6 +64,7 @@ class TestFullAnalyses(unittest.TestCase):
 
         with self.subTest('Graphs handling'):
             self.g_manager = ntupro.GraphManager(self.um.booked_units)
+            self.g_manager.optimize(2)
             self.graphs = self.g_manager.graphs
             self.assertIsNotNone(self.g_manager)
             self.assertIsNotNone(self.graphs)
