@@ -72,8 +72,8 @@ class Operation:
 
 class Cut(Operation):
     def __str__(self):
-        return 'Cut(' + self.name \
-                + ', ' + self.expression \
+        return 'Cut(' + self.expression \
+                + ', ' + self.name \
                 + ')'
 
     def __repr__(self):
@@ -82,8 +82,8 @@ class Cut(Operation):
 
 class Weight(Operation):
     def __str__(self):
-        return 'Weight(' + self.name \
-                + ', ' + self.expression \
+        return 'Weight(' + self.expression \
+                + ', ' + self.name \
                 + ')'
 
     def __repr__(self):
@@ -186,11 +186,43 @@ class Action:
     def __repr__(self):
         return  self.name
 
+
 class Count(Action):
     pass
 
 
 class Histogram(Action):
+    """
+    Basic histogram class, which takes as third argument either
+    a list (in this case, the values are the centres of each bin)
+    or a 3-tuple (bin-number, lowest, uppest).
+
+    Args:
+        name (string): Name of the histogram
+        variable (string): Variable to be plotted, usually it
+            coincides with name
+        setting (list/tuple): If a list, it represents the centres
+            of each bin; if a tuple (3 elements), it represents
+            the usual (nbins, low, up) scheme
+        expression (string): Definition of the variable as a function
+            of other variables; this is used to feed the RDataFrame.Define(name, expression)
+            method in the last part, i.e. to define a new column of the RDataFrame with
+            the name of the histogram if not yet present
+
+    Attributes:
+        name (string): Name of the histogram
+        variable (string): Variable to be plotted, usually it
+            coincides with name
+        edges (list): Edges of the histogram (if setting is a list)
+        nbins (int): Number of bins (initialized if setting is a 3-tuple)
+        low (double): Lowest bin (initialized if setting is a 3-tuple)
+        up (double): Uppest bin (initialized if setting is a 3-tuple)
+        expression (string): definition of the variable as a function
+            of other variables; this is used to feed the RDataFrame.Define(name, expression)
+            method in the last part, i.e. to define a new column of the RDataFrame with
+            the name of the histogram if not yet present
+    """
+
     def __init__(self, name, variable, setting, expression = None):
         Action.__init__(self, name, variable)
         if isinstance(setting, list):
