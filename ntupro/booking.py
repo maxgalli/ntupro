@@ -214,12 +214,14 @@ class Unit:
             name = action.name.replace('Nominal', self.variation.name)
         if isinstance(action, Histogram):
             if action.edges:
-                return Histogram(name, action.variable, action.edges, action.expression)
+                return Histogram(name, action.variable, action.edges,
+                        action.expression, action.prerequisites)
             else:
                 return Histogram(name, action.variable,
-                        (action.nbins, action.low, action.up), action.expression)
+                        (action.nbins, action.low, action.up),
+                        action.expression, action.prerequisites)
         elif isinstance(action, Count):
-            return Count(name, action.variable)
+            return Count(name, action.variable, action.prerequisites)
 
     def __eq__(self, other):
         return self.dataset == other.dataset and \

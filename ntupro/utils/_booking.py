@@ -175,10 +175,13 @@ class Selection:
 
 
 class Action:
-    def __init__(self,
-            name, variable):
+    def __init__(self, name, variable, prerequisites = None):
         self.name = name
         self.variable = variable
+        if not prerequisites or isinstance(prerequisites, dict):
+            self.prerequisites = prerequisites
+        else:
+            raise TypeError('prerequisites must be of type dict')
 
     def __str__(self):
         return  self.name
@@ -208,6 +211,8 @@ class Histogram(Action):
             of other variables; this is used to feed the RDataFrame.Define(name, expression)
             method in the last part, i.e. to define a new column of the RDataFrame with
             the name of the histogram if not yet present
+        prerequisites (dict): Dictionary containing columns on which the variable
+            depends which are not part of the existent dataframe, in the form {'var': 'expression'}
 
     Attributes:
         name (string): Name of the histogram
@@ -221,10 +226,11 @@ class Histogram(Action):
             of other variables; this is used to feed the RDataFrame.Define(name, expression)
             method in the last part, i.e. to define a new column of the RDataFrame with
             the name of the histogram if not yet present
+        prerequisites (dict): Dictionary containing columns on which the variable
+            depends which are not part of the existent dataframe, in the form {'var': 'expression'}
     """
-
-    def __init__(self, name, variable, setting, expression = None):
-        Action.__init__(self, name, variable)
+    def __init__(self, name, variable, setting, expression = None, prerequisites = None):
+        Action.__init__(self, name, variable, prerequisites)
         if isinstance(setting, list):
             self.edges = setting
         elif isinstance(setting, tuple):

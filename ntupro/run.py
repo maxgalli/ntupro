@@ -184,6 +184,12 @@ class RunManager:
             low = histogram.low
             up = histogram.up
         var_expression = histogram.expression
+        prerequisites = histogram.prerequisites
+
+        # Create prerequisite columns if present in the Histogram object
+        if prerequisites:
+            for column, expression in prerequisites.items():
+                rcw.frame = rcw.frame.Define(column, expression)
 
         # Create column from expression if present in Histogram object
         if var_expression:
