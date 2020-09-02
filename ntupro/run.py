@@ -46,25 +46,6 @@ class RunManager:
         self.friend_tchains = list()
         self.rcws = list()
 
-    def _get_results_from_graph(self, graph):
-        start = time()
-        ptrs = self.node_to_root(graph)
-        logger.debug('%%%%%%%%%% Ready to produce a subset of {} shapes'.format(
-            len(ptrs)))
-        results = list()
-        for ptr in ptrs:
-            th = ptr.GetValue()
-            results.append(th)
-        # Sanity check: event loop run only once for each RDataFrame
-        for rcw in self.rcws:
-            loops = rcw.frame.GetNRuns()
-            if loops != 1:
-                logger.warning('Event loop run {} times'.format(loops))
-        end = time()
-        logger.debug('Event loop for graph {:} run in {:.2f} seconds'.format(
-            repr(graph), end - start))
-        return results
-
     def run_locally(self, output, nworkers = 1, nthreads = 1):
         """Save to file the histograms booked.
 
@@ -94,10 +75,7 @@ class RunManager:
         logger.info('Finished computations in {} seconds'.format(int(end - start)))
         logger.info('Write {} results from {} graphs to file {}'.format(
             len(final_results), len(self.graphs), output))
-        root_file = TFile(output, 'RECREATE')
-        for op in final_results:
-            op.Write()
-        root_file.Close()
+        self.__write_results_to_root_file(output, final_results)
 
     def run_on_htcondor(self, output, map_tag = 'ntupro'):
         try:
@@ -113,16 +91,38 @@ class RunManager:
         logger.info('Finished computations in {} seconds'.format(int(end - start)))
         logger.info('Write {} results from {} graphs to file {}'.format(
             len(final_results), len(self.graphs), output))
+        self.__write_results_to_root_file(output, final_results)
+
+    def _get_results_from_graph(self, graph):
+        start = time()
+        ptrs = self.__node_to_root(graph)
+        logger.debug('%%%%%%%%%% Ready to produce a subset of {} shapes'.format(
+            len(ptrs)))
+        results = list()
+        for ptr in ptrs:
+            th = ptr.GetValue()
+            results.append(th)
+        # Sanity check: event loop run only once for each RDataFrame
+        for rcw in self.rcws:
+            loops = rcw.frame.GetNRuns()
+            if loops != 1:
+                logger.warning('Event loop run {} times'.format(loops))
+        end = time()
+        logger.debug('Event loop for graph {:} run in {:.2f} seconds'.format(
+            repr(graph), end - start))
+        return results
+
+    def __write_results_to_root_file(self, output, final_results):
         root_file = TFile(output, 'RECREATE')
         for op in final_results:
             op.Write()
         root_file.Close()
 
-    def node_to_root(self, node, final_results = None, rcw = None):
+    def __node_to_root(self, node, final_results = None, rcw = None):
         if final_results is None:
             final_results = list()
         if node.kind == 'dataset':
-            logger.debug('%%%%%%%%%% node_to_root, converting to ROOT language the following dataset node\n{}'.format(
+            logger.debug('%%%%%%%%%% __node_to_root, converting to ROOT language the following dataset node\n{}'.format(
                 node))
             result = self.__rdf_from_dataset(
                 node.unit_block)
@@ -130,12 +130,12 @@ class RunManager:
                 self.rcws.append(result)
         elif node.kind == 'selection':
             if len(node.children) > 1:
-                logger.debug('%%%%%%%%%% node_to_root, converting to ROOT language the following crossroad node\n{}'.format(
+                logger.debug('%%%%%%%%%% __node_to_root, converting to ROOT language the following crossroad node\n{}'.format(
                     node))
             result = self.__cuts_and_weights_from_selection(
                 rcw, node.unit_block)
         elif node.kind == 'action':
-            logger.debug('%%%%%%%%%% node_to_root, converting to ROOT language the following action node\n{}'.format(
+            logger.debug('%%%%%%%%%% __node_to_root, converting to ROOT language the following action node\n{}'.format(
                 node))
             if isinstance(node.unit_block, Count):
                 result = self.__sum_from_count(
@@ -145,7 +145,7 @@ class RunManager:
                     rcw, node.unit_block)
         if node.children:
             for child in node.children:
-                self.node_to_root(child, final_results, result)
+                self.__node_to_root(child, final_results, result)
         else:
             final_results.append(result)
         return final_results
