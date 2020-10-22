@@ -126,7 +126,9 @@ def dataset_from_files(dataset_name, tree_name, file_names):
         root_file = TFile.Open(file_name)
         if root_file.IsZombie():
             raise FileNotFoundError('File {} does not exist, abort'.format(file_name))
-        if tree_name not in root_file.GetListOfKeys():
+        try:
+            root_file.Get(tree_name)
+        except:
             raise NameError('Tree {} does not exist in {}\n'.format(tree_name, file_name))
         root_file.Close()
         return Ntuple(file_name, tree_name)
