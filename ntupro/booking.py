@@ -105,7 +105,7 @@ def dataset_from_artusoutput(
     return Dataset(dataset_name, ntuples)
 
 
-def dataset_from_files(dataset_name, tree_name, file_names):
+def dataset_from_files(dataset_name, tree_name, file_names, be_picky = True):
     """Create a Dataset object from a list containing the names
     of the ROOT files (e.g. [root_file1, root_file2, (...)]):
     E.g.:
@@ -124,7 +124,7 @@ def dataset_from_files(dataset_name, tree_name, file_names):
         # Use TFile.Open() instead of TFile() in order to deal with
         # files accessed from remote
         root_file = TFile.Open(file_name)
-        if root_file.IsZombie():
+        if not root_file or root_file.IsZombie():
             raise FileNotFoundError('File {} does not exist, abort'.format(file_name))
         try:
             root_file.Get(tree_name)
@@ -136,7 +136,15 @@ def dataset_from_files(dataset_name, tree_name, file_names):
     if not isinstance(file_names, list):
         raise TypeError('A list containing file names is required')
 
-    ntuples = [return_existent_tuple(file_name, tree_name) for file_name in file_names]
+    if be_picky:
+        ntuples = [return_existent_tuple(file_name, tree_name) for file_name in file_names]
+    else:
+        ntuples = []
+        for file_name in file_names:
+            try:
+                ntuples.append(return_existent_tuple(file_name, tree_name))
+            except:
+                continue
 
     return Dataset(dataset_name, ntuples)
 
