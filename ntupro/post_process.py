@@ -1,4 +1,3 @@
-from copy import deepcopy
 import ROOT
 from .run import RunManager
 
@@ -8,13 +7,12 @@ class Customizer:
     def __init__(self, source):
         self.histos = {}
         if isinstance(source, str):
-            root_file = ROOT.TFile(source)
-            names = [key.GetName() for key in root_file.GetListOfKeys()]
+            self.source_file = ROOT.TFile(source)
+            names = [key.GetName() for key in self.source_file.GetListOfKeys()]
             for name in names:
-                obj = root_file.Get(name)
+                obj = self.source_file.Get(name)
                 if isinstance(obj, (ROOT.TH1D, ROOT.TH1F)):
-                    self.histos[name] = deepcopy(obj)
-            root_file.Close()
+                    self.histos[name] = obj
         elif isinstance(source, RunManager):
             pass
         else:
