@@ -124,7 +124,7 @@ class RemoveCut(Variation):
         if not set([cut.name for selection in unit.selections for cut in selection.cuts \
                 if cut.name == self.removed_name]):
             raise NameError('Cut {} not found in any selection of this Unit'.format(self.removed_name))
-        new_selections = [selection for selection in unit.selections]
+        new_selections = [deepcopy(selection) for selection in unit.selections]
         for new_selection in new_selections:
             new_selection.remove_cut(self.removed_name)
         return Unit(unit.dataset, new_selections, unit.actions, self)
@@ -141,7 +141,7 @@ class RemoveWeight(Variation):
         if not set([weight.name for selection in unit.selections for weight in selection.weights \
                 if weight.name == self.removed_name]):
             raise NameError('Weight {} not found in any selection of this Unit'.format(self.removed_name))
-        new_selections = [selection for selection in unit.selections]
+        new_selections = [deepcopy(selection) for selection in unit.selections]
         for new_selection in new_selections:
             new_selection.remove_weight(self.removed_name)
         return Unit(unit.dataset, new_selections, unit.actions, self)
@@ -185,10 +185,10 @@ class SquareWeight(Variation):
         if not set([weight.name for selection in unit.selections for weight in selection.weights \
                 if weight.name == self.weight_name]):
             raise NameError('Weight {} not found in any selection of this Unit'.format(self.weight_name))
-        new_selections = [selection for selection in unit.selections]
+        new_selections = [deepcopy(selection) for selection in unit.selections]
         for new_selection in new_selections:
             for weight in new_selection.weights:
-                if weight.name == self.name:
+                if weight.name == self.weight_name:
                     weight.square()
         return Unit(unit.dataset, new_selections, unit.actions, self)
 
