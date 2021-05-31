@@ -1,5 +1,15 @@
 import setuptools
 
+def get_dependencies(env_yaml_file):
+    import yaml
+    with open(env_yaml_file, "r") as f:
+        environment = yaml.safe_load(f)
+    dependencies = []
+    for dep in environment["dependencies"]:
+        if dep != "root" and not dep.startswith("python"):
+            dependencies.append(dep)
+    return dependencies
+
 readme = open("README.md", "r")
 long_description = ''
 for line in readme:
@@ -21,5 +31,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    install_requires=get_dependencies("ntupro_env.yml"),
     python_requires='>=3.6',
 )

@@ -1,0 +1,6 @@
+name: ntupro
+channels:
+  - conda-forge
+dependencies:
+  - root
+  - pyyaml
