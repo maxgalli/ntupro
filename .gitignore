@@ -56,3 +56,6 @@ docs/_build/
 # Tests output
 tests/samples/*
 tests/output_files/*
+
+#VSCode
+.vscode/*
